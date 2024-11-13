@@ -752,10 +752,10 @@ class BMACounter:
                 os.path.join(self.save_dir, "focus_regions", "high_mag_unannotated"),
                 exist_ok=True,
             )
-            os.makedirs(
-                os.path.join(self.save_dir, "focus_regions", "low_mag_selected"),
-                exist_ok=True,
-            )
+            # os.makedirs(
+            #     os.path.join(self.save_dir, "focus_regions", "low_mag_selected"),
+            #     exist_ok=True,
+            # ) 
             for focus_region in tqdm(
                 self.focus_regions, desc="Saving focus regions high mag images"
             ):

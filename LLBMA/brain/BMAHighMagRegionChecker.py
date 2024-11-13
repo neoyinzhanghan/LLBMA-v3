@@ -14,6 +14,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from torchvision import transforms, datasets, models
 from torchmetrics import Accuracy, AUROC
 from PIL import Image
+from 
 
 default_config = {"lr": 3.56e-06}  # 3.56e-07
 num_epochs = 100
@@ -299,3 +300,30 @@ class BMAHighMagRegionChecker:
 
     def check_batch(self, focus_regions):
         return [self.check(focus_region) for focus_region in focus_regions]
+
+@ray.remote(num_gpus=1)
+class BMAHighMagRegionCropperAndChecker:
+    """ 
+    A class representing a manager that crops and checks high magnification regions.
+    --wsi_path : the path to the WSI
+    --wsi: the openslide object of the WSI
+    --model_ckpt_path : the path to the checkpoint of the model
+    --model : the model object
+    --num_regions_processed: how many regions have been processed
+    --max_num_regions: the maximum number of regions to process
+    """
+
+    def __init__(self, wsi_path, model_ckpt_path):
+        self.wsi_path = wsi_path
+        self.wsi = openslide.OpenSlide(wsi_path)
+        self.model = load_model_checkpoint(model_ckpt_path)
+        self.model.eval()
+        self.model.to("cuda")
+        self.num_regions_processed = 0
+        self.max_num_regions = 100
+
+    def async_crop_and_check(self, focus_region_level_0_coords_batch):
+
+        if self.num_regions_processed >= self.max_num_regions:
+            return []
+        pass

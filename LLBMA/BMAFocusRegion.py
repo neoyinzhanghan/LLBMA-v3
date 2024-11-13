@@ -223,14 +223,14 @@ class FocusRegion:
                         f"{self.idx}.jpg",
                     )
                 )
-                self.downsampled_image.save(
-                    os.path.join(
-                        save_dir,
-                        "focus_regions",
-                        "low_mag_selected",
-                        f"{self.idx}.jpg",
-                    )
-                )
+                # self.downsampled_image.save(
+                #     os.path.join(
+                #         save_dir,
+                #         "focus_regions",
+                #         "low_mag_selected",
+                #         f"{self.idx}.jpg",
+                #     )
+                # ) # TODO TODO TODO due to the low mag ranking algorithm we no longer save the low mag selected images as there is no longer thresholded low mag selection
 
     class FocusRegionNotAnnotatedError(Exception):
         """Raise when the focus region is not annotated yet."""

@@ -13,7 +13,6 @@ from LLBMA.brain.utils import create_list_of_batches_from_list
 from tqdm import tqdm
 from ray.exceptions import RayTaskError
 
-
 # Within package imports ###########################################################################
 from LLBMA.communication.visualization import save_hist_KDE_rug_plot
 from LLBMA.brain.utils import *
@@ -167,9 +166,9 @@ class FocusRegionsTracker:
         # set the selected column to True for the top n focus regions AND the confidence score is above the threshold
         self.info_df.loc[
             (self.info_df["idx"].isin(top_n_idx))
-            & (self.info_df["adequate_confidence_score"] > region_clf_conf_thres),
-            "selected",
-        ] = True
+            & (self.info_df["adequate_confidence_score"] > 0),
+            "selected", 
+        ] = True # TODO TODO TODO remove this thresholding because we are going to do high mag region clf
 
         selected_idx = self.info_df[self.info_df["selected"]]["idx"]
         focus_regions = [self.focus_regions_dct[idx] for idx in selected_idx]

@@ -121,21 +121,22 @@ class BMAHighMagRegionCheckTracker:
         self.info_df.to_csv(f"{save_dir}/focus_regions/high_mag_focus_regions_info.csv")
 
     def hoard_results(self, save_dir):
-        os.makedirs(f"{save_dir}/focus_regions/high_mag_rejected", exist_ok=True)
+        # os.makedirs(f"{save_dir}/focus_regions/high_mag_rejected", exist_ok=True)
 
-        good_focus_regions = self.get_good_focus_regions()
-        bad_focus_regions = [
-            focus_region
-            for focus_region in self.focus_regions
-            if focus_region not in good_focus_regions
-        ]
+        # good_focus_regions = self.get_good_focus_regions()
+        # bad_focus_regions = [
+        #     focus_region
+        #     for focus_region in self.focus_regions
+        #     if focus_region not in good_focus_regions
+        # ]
 
-        for focus_region in tqdm(
-            bad_focus_regions, desc="Saving rejected focus regions..."
-        ):
-            focus_region.image.save(
-                f"{save_dir}/focus_regions/high_mag_rejected/{focus_region.idx}.jpg"
-            )
+        # for focus_region in tqdm(
+        #     bad_focus_regions, desc="Saving rejected focus regions..."
+        # ):
+        #     focus_region.image.save(
+        #         f"{save_dir}/focus_regions/high_mag_rejected/{focus_region.idx}.jpg"
+        #     )
+        pass # TODO TODO TODO we no longer hoard high mag rejected regions after the implementation of dynamic region filtering
 
 
 class HighMagCheckFailedError(Exception):
