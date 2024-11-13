@@ -114,3 +114,5 @@ def get_alternating_high_mag_focus_region_dataloader(
             focus_regions, wsi_path, batch_size, num_workers
         )
         dataloaders.append(dataloader)
+
+    return dataloaders
