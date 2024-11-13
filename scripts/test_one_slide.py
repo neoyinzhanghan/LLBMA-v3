@@ -23,5 +23,5 @@ if __name__ == "__main__":
         hoarding=True,
         continue_on_error=False,
         do_extract_features=False,
-        check_specimen_clf=True,
+        check_specimen_clf=False,
     )
