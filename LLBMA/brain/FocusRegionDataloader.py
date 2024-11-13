@@ -99,7 +99,7 @@ def get_alternating_high_mag_focus_region_dataloader(
     wsi_path,
     num_data_loaders=num_region_clf_managers,
     batch_size=region_clf_batch_size,
-    num_workers=num_croppers,
+    num_workers=0,  # num_croppers,
 ):
 
     list_of_lists_of_focus_regions = [[] for _ in range(num_data_loaders)]
