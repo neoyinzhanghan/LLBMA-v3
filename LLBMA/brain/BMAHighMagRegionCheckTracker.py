@@ -33,6 +33,7 @@ class BMAHighMagRegionCheckTracker:
 
     def __init__(self, focus_regions, wsi_path) -> None:
 
+        self.wsi_path = wsi_path
         tasks = {}
         new_focus_regions = []
 
