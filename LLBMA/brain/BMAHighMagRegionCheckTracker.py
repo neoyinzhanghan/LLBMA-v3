@@ -52,7 +52,7 @@ class BMAHighMagRegionCheckTracker:
             BMAHighMagRegionCheckerBatched.remote(
                 model_ckpt_path=high_mag_region_clf_ckpt_path,
             )
-            for _ in num_region_clf_managers
+            for _ in range(num_region_clf_managers)
         ]
 
         with tqdm(
