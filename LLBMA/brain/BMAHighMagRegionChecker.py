@@ -313,50 +313,41 @@ class BMAHighMagRegionCheckerBatched:
     A class representing a manager that crops and checks high magnification regions.
     --model_ckpt_path : the path to the checkpoint of the model
     --model : the model object
-    --num_regions_found: how many regions have been processed
-    --max_num_regions: the maximum number of regions to process
     """
 
     def __init__(self, model_ckpt_path):
         self.model = load_model_checkpoint(model_ckpt_path)
         self.model.eval()
         self.model.to("cuda")
-        self.num_regions_found = 0
-        self.max_num_regions = max_num_focus_regions // num_region_clf_managers
 
     def async_check_high_mag_score(self, batch):
+        focus_regions, image_tensor_stack = batch
 
-        if self.num_regions_found >= self.max_num_regions:
-            return []
-        else:
-            focus_regions, image_tensor_stack = batch
+        # move the image tensor stack to the GPU
+        image_tensor_stack = image_tensor_stack.to("cuda")
 
-            # move the image tensor stack to the GPU
-            image_tensor_stack = image_tensor_stack.to("cuda")
+        # get the model outputs
+        with torch.no_grad():
+            logits = self.model(image_tensor_stack)
+            probs = torch.softmax(logits, dim=1)
 
-            # get the model outputs
-            with torch.no_grad():
-                logits = self.model(image_tensor_stack)
-                probs = torch.softmax(logits, dim=1)
+            inadequate_confidence_scores = probs[:, 1].cpu().numpy()
 
-                inadequate_confidence_scores = probs[:, 1].cpu().numpy()
+            adequate_confidence_scores = 1 - inadequate_confidence_scores
 
-                adequate_confidence_scores = 1 - inadequate_confidence_scores
+        for i, focus_region in enumerate(focus_regions):
+            focus_region.adequate_confidence_score_high_mag = (
+                adequate_confidence_scores[i]
+            )
 
-            for i, focus_region in enumerate(focus_regions):
-                focus_region.adequate_confidence_score_high_mag = (
-                    adequate_confidence_scores[i]
-                )
+        good_focus_regions = [
+            focus_region
+            for focus_region in focus_regions
+            if focus_region.adequate_confidence_score_high_mag
+            > high_mag_region_clf_threshold
+        ]
 
-            good_focus_regions = [
-                focus_region
-                for focus_region in focus_regions
-                if focus_region.adequate_confidence_score_high_mag
-                > high_mag_region_clf_threshold
-            ]
-            self.num_regions_found += len(good_focus_regions)
-
-            return focus_regions
+        return focus_regions, len(good_focus_regions)
 
 
 @ray.remote(num_gpus=1)

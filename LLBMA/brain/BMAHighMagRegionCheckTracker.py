@@ -2,7 +2,7 @@ import os
 import ray
 import pandas as pd
 from LLBMA.brain.BMAHighMagRegionChecker import (
-    BMAHighMagRegionCheckerBatchedWithDataLoader,
+    BMAHighMagRegionCheckerBatched,
 )
 from LLBMA.resources.BMAassumptions import (
     num_region_clf_managers,
@@ -12,7 +12,7 @@ from LLBMA.resources.BMAassumptions import (
     max_num_focus_regions,
 )
 from LLBMA.brain.FocusRegionDataloader import (
-    get_alternating_high_mag_focus_region_dataloader,
+    get_high_mag_focus_region_dataloader,
 )
 from tqdm import tqdm
 from ray.exceptions import RayTaskError
@@ -44,15 +44,15 @@ class BMAHighMagRegionCheckTracker:
 
         sorted_focus_regions = sort_focus_regions_based_on_low_mag_score(focus_regions)
 
-        dataloaders = get_alternating_high_mag_focus_region_dataloader(
-            focus_regions=sorted_focus_regions, wsi_path=self.wsi_path
+        dataloader = get_high_mag_focus_region_dataloader(
+            sorted_focus_regions, wsi_path
         )
 
         high_mag_checkers = [
-            BMAHighMagRegionCheckerBatchedWithDataLoader.remote(
-                model_ckpt_path=high_mag_region_clf_ckpt_path, dataloader=dataloader
+            BMAHighMagRegionCheckerBatched.remote(
+                model_ckpt_path=high_mag_region_clf_ckpt_path,
             )
-            for dataloader in dataloaders
+            for _ in num_region_clf_managers
         ]
 
         with tqdm(
@@ -65,8 +65,9 @@ class BMAHighMagRegionCheckTracker:
             ) as pbar_R:
 
                 for high_mag_checker in high_mag_checkers:
+                    batch = next(iter(dataloader))
                     tasks[high_mag_checker] = (
-                        high_mag_checker.async_run_one_batch.remote()
+                        high_mag_checker.async_check_high_mag_score.remote(batch)
                     )
 
                     while tasks:
