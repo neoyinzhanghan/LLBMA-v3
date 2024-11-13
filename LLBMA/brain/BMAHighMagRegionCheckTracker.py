@@ -1,16 +1,21 @@
 import os
 import ray
 import pandas as pd
-from LLBMA.brain.BMAHighMagRegionChecker import BMAHighMagRegionChecker
+from LLBMA.brain.BMAHighMagRegionChecker import BMAHighMagRegionCheckerBatched
 from LLBMA.resources.BMAassumptions import (
     num_region_clf_managers,
     high_mag_region_clf_ckpt_path,
     min_num_focus_regions,
     high_mag_region_clf_threshold,
 )
-from LLBMA.brain.utils import create_list_of_batches_from_list
+from LLBMA.brain.FocusRegionDataloader import get_high_mag_focus_region_dataloader
 from tqdm import tqdm
 from ray.exceptions import RayTaskError
+
+
+def sort_focus_regions_based_on_low_mag_score(focus_regions):
+    """Sort the focus regions based on the confidence score at low magnification."""
+    return sorted(focus_regions, key=lambda x: x.adequate_confidence_score, reverse=True)
 
 
 class BMAHighMagRegionCheckTracker:
@@ -28,16 +33,18 @@ class BMAHighMagRegionCheckTracker:
         tasks = {}
         new_focus_regions = []
 
+        sorted_focus_regions = sort_focus_regions_based_on_low_mag_score(focus_regions)
+
         high_mag_checkers = [
-            BMAHighMagRegionChecker.remote(high_mag_region_clf_ckpt_path)
+            BMAHighMagRegionCheckerBatched.remote(high_mag_region_clf_ckpt_path)
             for _ in range(num_region_clf_managers)
         ]
 
-        list_of_batches = create_list_of_batches_from_list(focus_regions, 10)
+        dataloader = get_high_mag_focus_region_dataloader()
 
-        for i, batch in enumerate(list_of_batches):
+        for i, batch in enumerate(dataloader):
             manager = high_mag_checkers[i % num_region_clf_managers]
-            task = manager.check_batch.remote(batch)
+            task = manager.async_check_high_mag_score.remote(batch)
             tasks[task] = batch
 
         with tqdm(
