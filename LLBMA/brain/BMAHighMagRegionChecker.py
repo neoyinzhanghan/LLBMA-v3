@@ -15,7 +15,11 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from torchvision import transforms, datasets, models
 from torchmetrics import Accuracy, AUROC
 from PIL import Image
-from LLBMA.resources.BMAassumptions import max_num_focus_regions, num_region_clf_managers, high_mag_region_clf_threshold
+from LLBMA.resources.BMAassumptions import (
+    max_num_focus_regions,
+    num_region_clf_managers,
+    high_mag_region_clf_threshold,
+)
 
 default_config = {"lr": 3.56e-06}  # 3.56e-07
 num_epochs = 100
@@ -305,26 +309,22 @@ class BMAHighMagRegionChecker:
 
 @ray.remote(num_gpus=1)
 class BMAHighMagRegionCheckerBatched:
-    """ 
+    """
     A class representing a manager that crops and checks high magnification regions.
-    --wsi_path : the path to the WSI
-    --wsi: the openslide object of the WSI
     --model_ckpt_path : the path to the checkpoint of the model
     --model : the model object
     --num_regions_found: how many regions have been processed
     --max_num_regions: the maximum number of regions to process
     """
 
-    def __init__(self, wsi_path, model_ckpt_path):
-        self.wsi_path = wsi_path
-        self.wsi = openslide.OpenSlide(wsi_path)
+    def __init__(self, model_ckpt_path):
         self.model = load_model_checkpoint(model_ckpt_path)
         self.model.eval()
         self.model.to("cuda")
         self.num_regions_found = 0
         self.max_num_regions = max_num_focus_regions // num_region_clf_managers
 
-    def async_check_high_mag_score(self, batch):        
+    def async_check_high_mag_score(self, batch):
 
         if self.num_regions_found >= self.max_num_regions:
             return []
@@ -344,10 +344,16 @@ class BMAHighMagRegionCheckerBatched:
                 adequate_confidence_scores = 1 - inadequate_confidence_scores
 
             for i, focus_region in enumerate(focus_regions):
-                focus_region.adequate_confidence_score_high_mag = adequate_confidence_scores[i] 
+                focus_region.adequate_confidence_score_high_mag = (
+                    adequate_confidence_scores[i]
+                )
 
-            
-            good_focus_regions = [focus_region for focus_region in focus_regions if focus_region.adequate_confidence_score_high_mag > high_mag_region_clf_threshold]
+            good_focus_regions = [
+                focus_region
+                for focus_region in focus_regions
+                if focus_region.adequate_confidence_score_high_mag
+                > high_mag_region_clf_threshold
+            ]
             self.num_regions_found += len(good_focus_regions)
 
             return focus_regions

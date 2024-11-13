@@ -145,7 +145,7 @@ class FocusRegionsTracker:
                 idx
             ].adequate_confidence_score
 
-    def get_top_n_focus_regions(self, n=max_num_regions_after_region_clf):
+    def get_top_n_focus_regions(self, n=None):
         """Return the top n focus regions with the highest confidence scores.
         But first we need to automatically filter out the focus regions whose adequacy confidence scores are below the threshold.
         """
@@ -155,6 +155,9 @@ class FocusRegionsTracker:
 
         # sort the info_df by confidence scores in descending order
         # the top_n_idx is a list of the indices of the top n focus regions where selected is not False
+
+        if n is None:
+            n = len(self.info_df)
 
         top_n_idx = self.info_df.sort_values(
             by=["adequate_confidence_score"], ascending=False

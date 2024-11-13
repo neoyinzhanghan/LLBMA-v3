@@ -15,7 +15,9 @@ from ray.exceptions import RayTaskError
 
 def sort_focus_regions_based_on_low_mag_score(focus_regions):
     """Sort the focus regions based on the confidence score at low magnification."""
-    return sorted(focus_regions, key=lambda x: x.adequate_confidence_score, reverse=True)
+    return sorted(
+        focus_regions, key=lambda x: x.adequate_confidence_score, reverse=True
+    )
 
 
 class BMAHighMagRegionCheckTracker:
@@ -37,11 +39,15 @@ class BMAHighMagRegionCheckTracker:
         sorted_focus_regions = sort_focus_regions_based_on_low_mag_score(focus_regions)
 
         high_mag_checkers = [
-            BMAHighMagRegionCheckerBatched.remote(high_mag_region_clf_ckpt_path)
+            BMAHighMagRegionCheckerBatched.remote(
+                model_ckpt_path=high_mag_region_clf_ckpt_path
+            )
             for _ in range(num_region_clf_managers)
         ]
 
-        dataloader = get_high_mag_focus_region_dataloader(focus_regions=sorted_focus_regions, wsi_path=self.wsi_path)
+        dataloader = get_high_mag_focus_region_dataloader(
+            focus_regions=sorted_focus_regions, wsi_path=self.wsi_path
+        )
 
         for i, batch in enumerate(dataloader):
             manager = high_mag_checkers[i % num_region_clf_managers]
@@ -144,7 +150,7 @@ class BMAHighMagRegionCheckTracker:
         #     focus_region.image.save(
         #         f"{save_dir}/focus_regions/high_mag_rejected/{focus_region.idx}.jpg"
         #     )
-        pass # TODO TODO TODO DEPRECATED we no longer hoard high mag rejected regions after the implementation of dynamic region filtering
+        pass  # TODO TODO TODO DEPRECATED we no longer hoard high mag rejected regions after the implementation of dynamic region filtering
 
 
 class HighMagCheckFailedError(Exception):
