@@ -1,8 +1,10 @@
 import os
 from LLBMA.front_end.api import analyse_bma
 
-slide_path = "/media/hdd3/neo/tmp_slide_dir/H22-7033;S12;MSK3 - 2023-06-06 19.17.45.ndpi"
-dump_dir = "/media/hdd3/neo/results_dir"
+slide_path = "/media/hdd3/neo/error_slides_ndpi/H19-6490;S10;MSKM - 2023-12-11 21.02.14.ndpi"
+dump_dir = "/media/hdd3/neo/test_error_results_dir"
+
+os.makedirs(dump_dir, exist_ok=True)
 
 if __name__ == "__main__":
 
