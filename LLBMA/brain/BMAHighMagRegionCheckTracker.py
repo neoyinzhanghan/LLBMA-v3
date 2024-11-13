@@ -25,10 +25,11 @@ class BMAHighMagRegionCheckTracker:
     === Class Attributes ===
     - focus_regions: a list of focus regions that made it past the low magnification checks
     - info_df: a pandas DataFrame that stores the information of the focus regions
+    - wsi_path: the path to the WSI
 
     """
 
-    def __init__(self, focus_regions) -> None:
+    def __init__(self, focus_regions, wsi_path) -> None:
 
         tasks = {}
         new_focus_regions = []
@@ -40,7 +41,7 @@ class BMAHighMagRegionCheckTracker:
             for _ in range(num_region_clf_managers)
         ]
 
-        dataloader = get_high_mag_focus_region_dataloader()
+        dataloader = get_high_mag_focus_region_dataloader(focus_regions=sorted_focus_regions, wsi_path=self.wsi_path)
 
         for i, batch in enumerate(dataloader):
             manager = high_mag_checkers[i % num_region_clf_managers]

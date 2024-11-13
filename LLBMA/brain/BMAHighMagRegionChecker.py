@@ -304,7 +304,7 @@ class BMAHighMagRegionChecker:
 
 
 @ray.remote(num_gpus=1)
-class BMAHighMagRegionChecker:
+class BMAHighMagRegionCheckerBatched:
     """ 
     A class representing a manager that crops and checks high magnification regions.
     --wsi_path : the path to the WSI

@@ -453,7 +453,8 @@ class BMACounter:
         start_time = time.time()
 
         high_mag_check_tracker = BMAHighMagRegionCheckTracker(
-            focus_regions=self.focus_regions
+            focus_regions=self.focus_regions,
+            wsi_path=self.wsi_path,
         )
 
         good_focus_regions = high_mag_check_tracker.get_good_focus_regions()
