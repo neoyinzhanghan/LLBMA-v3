@@ -13,7 +13,7 @@ class HighMagFocusRegionDataset(torch.utils.data.Dataset):
     """
     def __init__(self, focus_regions, wsi_path):
         self.focus_regions = focus_regions
-        self.wsi_path = focus_regions[0].wsi_path
+        self.wsi_path = wsi_path
         self.wsi = openslide.OpenSlide(wsi_path)
 
     def __len__(self):
