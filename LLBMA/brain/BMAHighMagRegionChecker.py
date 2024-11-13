@@ -357,3 +357,53 @@ class BMAHighMagRegionCheckerBatched:
             self.num_regions_found += len(good_focus_regions)
 
             return focus_regions
+
+
+@ray.remote(num_gpus=1)
+class BMAHighMagRegionCheckerBatchedWithDataLoader:
+    """
+    A class representing a manager that crops and checks high magnification regions.
+    --model_ckpt_path : the path to the checkpoint of the model
+    --model : the model object
+    --dataloader : the dataloader object
+    """
+
+    def __init__(self, model_ckpt_path, dataloader):
+        self.model = load_model_checkpoint(model_ckpt_path)
+        self.model.eval()
+        self.model.to("cuda")
+        self.dataloader = dataloader
+
+    def async_run_one_batch(self):
+        try:
+            batch = next(self.dataloader)
+        except StopIteration:
+            return []
+
+        focus_regions, image_tensor_stack = batch
+
+        # move the image tensor stack to the GPU
+        image_tensor_stack = image_tensor_stack.to("cuda")
+
+        # get the model outputs
+        with torch.no_grad():
+            logits = self.model(image_tensor_stack)
+            probs = torch.softmax(logits, dim=1)
+
+            inadequate_confidence_scores = probs[:, 1].cpu().numpy()
+
+            adequate_confidence_scores = 1 - inadequate_confidence_scores
+
+        for i, focus_region in enumerate(focus_regions):
+            focus_region.adequate_confidence_score_high_mag = (
+                adequate_confidence_scores[i]
+            )
+
+        good_focus_regions = [
+            focus_region
+            for focus_region in focus_regions
+            if focus_region.adequate_confidence_score_high_mag
+            > high_mag_region_clf_threshold
+        ]
+
+        return focus_regions, len(good_focus_regions)

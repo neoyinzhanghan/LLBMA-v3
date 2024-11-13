@@ -1,14 +1,19 @@
 import os
 import ray
 import pandas as pd
-from LLBMA.brain.BMAHighMagRegionChecker import BMAHighMagRegionCheckerBatched
+from LLBMA.brain.BMAHighMagRegionChecker import (
+    BMAHighMagRegionCheckerBatchedWithDataLoader,
+)
 from LLBMA.resources.BMAassumptions import (
     num_region_clf_managers,
     high_mag_region_clf_ckpt_path,
     min_num_focus_regions,
     high_mag_region_clf_threshold,
+    max_num_focus_regions,
 )
-from LLBMA.brain.FocusRegionDataloader import get_high_mag_focus_region_dataloader
+from LLBMA.brain.FocusRegionDataloader import (
+    get_alternating_high_mag_focus_region_dataloader,
+)
 from tqdm import tqdm
 from ray.exceptions import RayTaskError
 
@@ -39,42 +44,42 @@ class BMAHighMagRegionCheckTracker:
 
         sorted_focus_regions = sort_focus_regions_based_on_low_mag_score(focus_regions)
 
-        high_mag_checkers = [
-            BMAHighMagRegionCheckerBatched.remote(
-                model_ckpt_path=high_mag_region_clf_ckpt_path
-            )
-            for _ in range(num_region_clf_managers)
-        ]
-
-        dataloader = get_high_mag_focus_region_dataloader(
+        dataloaders = get_alternating_high_mag_focus_region_dataloader(
             focus_regions=sorted_focus_regions, wsi_path=self.wsi_path
         )
 
-        for i, batch in enumerate(dataloader):
-            manager = high_mag_checkers[i % num_region_clf_managers]
-            task = manager.async_check_high_mag_score.remote(batch)
-            tasks[task] = batch
+        high_mag_checkers = [
+            BMAHighMagRegionCheckerBatchedWithDataLoader.remote(
+                model_ckpt_path=high_mag_region_clf_ckpt_path, dataloader=dataloader
+            )
+            for dataloader in dataloaders
+        ]
 
         with tqdm(
             total=len(focus_regions),
             desc="Getting high magnification focus regions diagnostics...",
-        ) as pbar:
-            while tasks:
-                done_ids, _ = ray.wait(list(tasks.keys()))
+        ) as pbar_N:
+            with tqdm(
+                total=max_num_focus_regions,
+                desc="Getting high magnification focus regions diagnostics...",
+            ) as pbar_R:
 
-                for done_id in done_ids:
-                    try:
-                        results = ray.get(done_id)
-                        for result in results:
-                            new_focus_regions.append(result)
+                for high_mag_checker in high_mag_checkers:
+                    tasks[high_mag_checker] = (
+                        high_mag_checker.async_run_one_batch.remote()
+                    )
 
-                            pbar.update()
-
-                    except RayTaskError as e:
-                        print(
-                            f"Task for focus region {tasks[done_id]} failed with error: {e}"
-                        )
-                    del tasks[done_id]
+                    while tasks:
+                        done, _ = ray.wait(list(tasks.values()), timeout=0.1)
+                        for done_task_id in done:
+                            try:
+                                focus_regions, num_found = ray.get(tasks[done_task_id])
+                                new_focus_regions.append(focus_region)
+                                pbar_R.update(num_found)
+                                pbar_N.update(len(focus_regions))
+                            except RayTaskError as e:
+                                print(e)
+                            del tasks[done_task_id]
 
         ray.shutdown()
 
