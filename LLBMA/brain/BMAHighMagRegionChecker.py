@@ -1,5 +1,6 @@
 import os
 import torch
+import openslide
 import pytorch_lightning as pl
 import torch.optim.lr_scheduler as lr_scheduler
 import torch.nn.functional as F
@@ -14,7 +15,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from torchvision import transforms, datasets, models
 from torchmetrics import Accuracy, AUROC
 from PIL import Image
-from 
+from LLBMA.resources.BMAassumptions import max_num_focus_regions, num_region_clf_managers
 
 default_config = {"lr": 3.56e-06}  # 3.56e-07
 num_epochs = 100
@@ -301,6 +302,7 @@ class BMAHighMagRegionChecker:
     def check_batch(self, focus_regions):
         return [self.check(focus_region) for focus_region in focus_regions]
 
+
 @ray.remote(num_gpus=1)
 class BMAHighMagRegionCropperAndChecker:
     """ 
@@ -320,10 +322,30 @@ class BMAHighMagRegionCropperAndChecker:
         self.model.eval()
         self.model.to("cuda")
         self.num_regions_processed = 0
-        self.max_num_regions = 100
+        self.max_num_regions = max_num_focus_regions // num_region_clf_managers
 
-    def async_crop_and_check(self, focus_region_level_0_coords_batch):
+    def async_check_high_mag_score(self, batch):        
 
         if self.num_regions_processed >= self.max_num_regions:
             return []
-        pass
+        else:
+            focus_regions, image_tensor_stack = batch
+
+            # move the image tensor stack to the GPU
+            image_tensor_stack = image_tensor_stack.to("cuda")
+
+            # get the model outputs
+            with torch.no_grad():
+                logits = self.model(image_tensor_stack)
+                probs = torch.softmax(logits, dim=1)
+
+                inadequate_confidence_scores = probs[:, 1].cpu().numpy()
+
+                adequate_confidence_scores = 1 - inadequate_confidence_scores
+
+            for i, focus_region in enumerate(focus_regions):
+                focus_region.adequate_confidence_score_high_mag = adequate_confidence_scores[i] 
+
+            self.num_regions_processed += len(focus_regions)
+
+            return focus_regions

@@ -95,7 +95,7 @@ class BMAHighMagRegionCheckTracker:
     def get_good_focus_regions(self):
         """The criterion for a good focus region is that it has an adequate confidence score at high magnification:
         - VoL_high_mag > 7
-        - adequate_confidence_score_high_mag > 0.5
+        - adequate_confidence_score_high_mag > high_mag_region_clf_threshold
         """
 
         good_focus_regions = []
@@ -136,7 +136,7 @@ class BMAHighMagRegionCheckTracker:
         #     focus_region.image.save(
         #         f"{save_dir}/focus_regions/high_mag_rejected/{focus_region.idx}.jpg"
         #     )
-        pass # TODO TODO TODO we no longer hoard high mag rejected regions after the implementation of dynamic region filtering
+        pass # TODO TODO TODO DEPRECATED we no longer hoard high mag rejected regions after the implementation of dynamic region filtering
 
 
 class HighMagCheckFailedError(Exception):

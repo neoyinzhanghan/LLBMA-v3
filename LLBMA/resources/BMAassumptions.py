@@ -52,7 +52,8 @@ min_num_regions_after_WMP_max_filter = 150
 max_num_regions_after_region_clf = 1000
 max_num_cells = 3000
 min_num_cells = 10
-min_num_focus_regions = 10
+min_num_focus_regions = 20
+max_num_focus_regions = 200
 
 ###########################
 ### Parallel Processing ###
@@ -81,7 +82,9 @@ YOLO_batch_size = 32
 ### Models Configurations ###
 #############################
 
-region_clf_ckpt_path = "/media/hdd3/neo/MODELS/2024-04-25 BMARegionClf Low Mag w Aug 500 Epochs/8/version_0/checkpoints/epoch=499-step=27500.ckpt"
+# region_clf_ckpt_path = "/media/hdd3/neo/MODELS/2024-04-25 BMARegionClf Low Mag w Aug 500 Epochs/8/version_0/checkpoints/epoch=499-step=27500.ckpt" # TODO REMOVE this is the old path
+region_clf_ckpt_path = "/media/hdd3/neo/MODELS/2024-11-07_BMARegionClf-20K/8/version_0/checkpoints/epoch=64-step=21515.ckpt"
+# region_clf_ckpt_path = "/media/hdd3/neo/MODELS/2024-11-11_BMARegionClf-20K-balanced/8/version_0/checkpoints/epoch=74-step=15075.ckpt"
 # region_clf_ckpt_path = "/media/hdd3/neo/MODELS/2024-02-29 Region Clf no normalization/lightning_logs/8/version_0/checkpoints/epoch=99-step=8200.ckpt"
 # region_clf_ckpt_path = "/media/ssd1/neo/LLCKPTS/epoch=99-step=10300.ckpt" # This one is for alpaca
 # region_clf_ckpt_path = "/media/hdd2/neo/LLCKPTS/epoch=99-step=10300.ckpt" # This one is for bear
@@ -106,8 +109,10 @@ specimen_clf_checkpoint_path = "/home/greg/Documents/neo/LLCKPTS/SClf.ckpt"
 feature_extractor_ckpt_dict = {}
 supported_feature_extraction_archs = feature_extractor_ckpt_dict.keys()
 
-high_mag_region_clf_ckpt_path = "/media/hdd3/neo/MODELS/2024-04-24 BMARegionClf High Mag w Aug/1/version_0/checkpoints/epoch=199-step=11000.ckpt"
-high_mag_region_clf_threshold = 0.3
+# high_mag_region_clf_ckpt_path = "/media/hdd3/neo/MODELS/2024-04-24 BMARegionClf High Mag w Aug/1/version_0/checkpoints/epoch=199-step=11000.ckpt" # TODO REMOVE this is the old path
+# high_mag_region_clf_ckpt_path = "/media/hdd3/neo/MODELS/2024-11-11_BMARegionClf-20K-balanced/1/version_0/checkpoints/epoch=74-step=15075.ckpt"
+high_mag_region_clf_ckpt_path = "/media/hdd3/neo/MODELS/2024-11-07_BMARegionClf-20K/1/version_0/checkpoints/epoch=64-step=21515.ckpt"
+high_mag_region_clf_threshold = 0.9
 
 ###########################
 ### Augmentation Config ###
