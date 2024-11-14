@@ -38,6 +38,7 @@ from LLBMA.BMAFocusRegion import *
 from LLBMA.BMAFocusRegionTracker import FocusRegionsTracker, NotEnoughFocusRegionsError
 from LLBMA.brain.BMAHighMagRegionCheckTracker import BMAHighMagRegionCheckTracker
 from LLBMA.resources.BMAassumptions import *
+from LLBMA.tiling.dzsave_h5 import dzsave_h5
 
 
 class BMACounter:
@@ -77,6 +78,7 @@ class BMACounter:
         do_extract_features: bool = False,
         overwrite: bool = True,
         error: bool = False,
+        keep_h5: bool = True,
     ):
         """Initialize a BMACounter object."""
 
@@ -95,6 +97,7 @@ class BMACounter:
         self.overwrite = overwrite
         self.error = error
         self.extra_hoarding = extra_hoarding
+        self.keep_h5 = keep_h5
 
         # The focus regions and WBC candidates are None until they are processed
         self.focus_regions = None
@@ -278,6 +281,20 @@ class BMACounter:
                 self.error = True
                 raise e
 
+    def dzsave_slide(self):
+        """
+        Create a dzsave of the slide at the save_dir.
+        """
+        dzsave_path = os.path.join(self.save_dir, "slide.h5")
+        dzsave_h5(self.wsi_path, dzsave_path)
+
+    def delete_dzsave(self):
+        """
+        Delete the dzsave of the slide at the save_dir.
+        """
+        dzsave_path = os.path.join(self.save_dir, "slide.h5")
+        os.remove(dzsave_path)
+
     def find_focus_regions(self):
         """Return the focus regions of the highest magnification view."""
 
@@ -406,53 +423,51 @@ class BMACounter:
 
         # now for each focus region, we will find get the image
 
-        # TODO DEPRECATED
+        start_time = time.time()
 
-        # start_time = time.time()
+        for focus_region in tqdm(
+            self.focus_regions, desc="Getting high magnification focus region images"
+        ):
+            wsi = openslide.OpenSlide(self.wsi_path)
 
-        # for focus_region in tqdm(
-        #     self.focus_regions, desc="Getting high magnification focus region images"
-        # ):
-        #     wsi = openslide.OpenSlide(self.wsi_path)
+            pad_size = snap_shot_size // 2
 
-        #     pad_size = snap_shot_size // 2
+            padded_coordinate = (
+                focus_region.coordinate[0] - pad_size,
+                focus_region.coordinate[1] - pad_size,
+                focus_region.coordinate[2] + pad_size,
+                focus_region.coordinate[3] + pad_size,
+            )
+            padded_image = wsi.read_region(
+                padded_coordinate,
+                0,
+                (
+                    focus_region.coordinate[2]
+                    - focus_region.coordinate[0]
+                    + pad_size * 2,
+                    focus_region.coordinate[3]
+                    - focus_region.coordinate[1]
+                    + pad_size * 2,
+                ),
+            )
 
-        #     padded_coordinate = (
-        #         focus_region.coordinate[0] - pad_size,
-        #         focus_region.coordinate[1] - pad_size,
-        #         focus_region.coordinate[2] + pad_size,
-        #         focus_region.coordinate[3] + pad_size,
-        #     )
-        #     padded_image = wsi.read_region(
-        #         padded_coordinate,
-        #         0,
-        #         (
-        #             focus_region.coordinate[2]
-        #             - focus_region.coordinate[0]
-        #             + pad_size * 2,
-        #             focus_region.coordinate[3]
-        #             - focus_region.coordinate[1]
-        #             + pad_size * 2,
-        #         ),
-        #     )
+            original_width = focus_region.coordinate[2] - focus_region.coordinate[0]
+            original_height = focus_region.coordinate[3] - focus_region.coordinate[1]
 
-        #     original_width = focus_region.coordinate[2] - focus_region.coordinate[0]
-        #     original_height = focus_region.coordinate[3] - focus_region.coordinate[1]
+            unpadded_image = padded_image.crop(
+                (
+                    pad_size,
+                    pad_size,
+                    pad_size + original_width,
+                    pad_size + original_height,
+                )
+            )
 
-        #     unpadded_image = padded_image.crop(
-        #         (
-        #             pad_size,
-        #             pad_size,
-        #             pad_size + original_width,
-        #             pad_size + original_height,
-        #         )
-        #     )
+            focus_region.get_image(unpadded_image, padded_image)
 
-        #     focus_region.get_image(unpadded_image, padded_image)
+        self.profiling_data["getting_high_mag_images_time"] = time.time() - start_time
 
-        # self.profiling_data["getting_high_mag_images_time"] = time.time() - start_time
-
-        # start_time = time.time()
+        start_time = time.time()
 
         high_mag_check_tracker = BMAHighMagRegionCheckTracker(
             focus_regions=self.focus_regions,
@@ -1002,6 +1017,12 @@ class BMACounter:
                 selected_variable_names,
                 os.path.join(self.save_dir, "global_config.yaml"),
             )
+
+            self.dzsave_slide()
+
+            import sys
+
+            sys.exit()
 
             if self.focus_regions is None:
                 self.find_focus_regions()

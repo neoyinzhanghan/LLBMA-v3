@@ -9,7 +9,7 @@ import ray
 # Within package imports ###########################################################################
 from LLBMA.vision.image_quality import VoL
 from LLBMA.BMAFocusRegion import FocusRegion
-from LLBMA.resources.BMAassumptions import search_view_level, search_view_downsample_rate, search_view_focus_regions_size
+from LLBMA.resources.BMAassumptions import search_view_level, search_view_downsample_rate, search_view_focus_regions_size, snap_shot_size
 
 
 # @ray.remote(num_cpus=num_cpus_per_cropper)
@@ -69,5 +69,44 @@ class WSICropManager:
 
             focus_region = FocusRegion(downsampled_coordinate=focus_region_coord, downsampled_image=image)
             focus_regions.append(focus_region)
+
+        for focus_region in focus_regions:
+            wsi = openslide.OpenSlide(self.wsi_path)
+
+            pad_size = snap_shot_size // 2
+
+            padded_coordinate = (
+                focus_region.coordinate[0] - pad_size,
+                focus_region.coordinate[1] - pad_size,
+                focus_region.coordinate[2] + pad_size,
+                focus_region.coordinate[3] + pad_size,
+            )
+            padded_image = wsi.read_region(
+                padded_coordinate,
+                0,
+                (
+                    focus_region.coordinate[2]
+                    - focus_region.coordinate[0]
+                    + pad_size * 2,
+                    focus_region.coordinate[3]
+                    - focus_region.coordinate[1]
+                    + pad_size * 2,
+                ),
+            )
+
+            original_width = focus_region.coordinate[2] - focus_region.coordinate[0]
+            original_height = focus_region.coordinate[3] - focus_region.coordinate[1]
+
+            unpadded_image = padded_image.crop(
+                (
+                    pad_size,
+                    pad_size,
+                    pad_size + original_width,
+                    pad_size + original_height,
+                )
+            )
+
+            focus_region.get_image(unpadded_image, padded_image)
+        
 
         return focus_regions
