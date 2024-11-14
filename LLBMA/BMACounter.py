@@ -299,9 +299,6 @@ class BMACounter:
         """Return the focus regions of the highest magnification view."""
 
         start_time = time.time()
-
-        self.h5_reader.open()
-
         os.makedirs(os.path.join(self.save_dir, "focus_regions"), exist_ok=True)
 
         # First get a list of the focus regions coordinates based on focus_regions_size at highest level of magnification
