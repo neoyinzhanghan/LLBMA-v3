@@ -61,7 +61,7 @@ max_num_focus_regions = 200
 
 num_gpus = 2
 num_cpus = 64
-num_croppers = 64
+num_croppers = 32
 num_YOLOManagers = 2
 max_num_wbc_per_manager = max_num_cells // num_YOLOManagers
 num_labellers = 2
