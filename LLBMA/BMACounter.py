@@ -300,6 +300,8 @@ class BMACounter:
 
         start_time = time.time()
 
+        self.h5_reader.open()
+
         os.makedirs(os.path.join(self.save_dir, "focus_regions"), exist_ok=True)
 
         # First get a list of the focus regions coordinates based on focus_regions_size at highest level of magnification
@@ -1020,13 +1022,13 @@ class BMACounter:
 
             self.dzsave_slide()
 
-            import sys
-
-            sys.exit()
-
             if self.focus_regions is None:
                 self.find_focus_regions()
                 self.filter_focus_regions()
+
+            import sys
+
+            sys.exit()
 
             if self.wbc_candidates is None:
                 self.find_wbc_candidates()

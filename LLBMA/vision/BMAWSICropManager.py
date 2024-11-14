@@ -9,7 +9,14 @@ import ray
 # Within package imports ###########################################################################
 from LLBMA.vision.image_quality import VoL
 from LLBMA.BMAFocusRegion import FocusRegion
-from LLBMA.resources.BMAassumptions import search_view_level, search_view_downsample_rate, search_view_focus_regions_size, snap_shot_size
+from LLBMA.resources.BMAassumptions import (
+    search_view_level,
+    search_view_downsample_rate,
+    search_view_focus_regions_size,
+    snap_shot_size,
+)
+from LLBMA.tiling.h5_reader_instance_class import h5_reader
+from PIL import Image, ImageOps
 
 
 # @ray.remote(num_cpus=num_cpus_per_cropper)
@@ -65,9 +72,15 @@ class WSICropManager:
         focus_regions = []
         for focus_region_coord in focus_region_coords:
 
-            image = self.crop(focus_region_coord, level=search_view_level, downsample_rate=search_view_downsample_rate)
+            image = self.crop(
+                focus_region_coord,
+                level=search_view_level,
+                downsample_rate=search_view_downsample_rate,
+            )
 
-            focus_region = FocusRegion(downsampled_coordinate=focus_region_coord, downsampled_image=image)
+            focus_region = FocusRegion(
+                downsampled_coordinate=focus_region_coord, downsampled_image=image
+            )
             focus_regions.append(focus_region)
 
         for focus_region in focus_regions:
@@ -107,6 +120,58 @@ class WSICropManager:
             )
 
             focus_region.get_image(unpadded_image, padded_image)
-        
+
+        return focus_regions
+
+
+# @ray.remote(num_cpus=num_cpus_per_cropper)
+@ray.remote
+class WSIH5FocusRegionCreationManager:
+    """A class representing a manager that create focus regions from h5 dzsaved source.
+
+    === Class Attributes ===
+    - h5_path : the path to the h5 file
+    - h5_reader : the h5 reader
+    """
+
+    def __init__(self, h5_path) -> None:
+        self.h5_path = h5_path
+        self.h5_reader = h5_reader(h5_path)
+        self.h5_reader.open()
+
+    def async_get_bma_focus_region_batch(self, focus_region_coords):
+        """Return a list of focus regions."""
+
+        focus_regions = []
+        for focus_region_coord in focus_region_coords:
+
+            image = self.h5_reader.read_region(
+                level=0,
+                TL_x=focus_region_coord[0],
+                TL_y=focus_region_coord[1],
+            )
+
+            # Define the padding size (half of `snap_shot_size`)
+            padding_size = snap_shot_size // 2
+
+            # Add padding around the image with black pixels
+            padded_image = ImageOps.expand(image, border=padding_size, fill="black")
+
+            # downsampling the image by a factor of 2 ** search_view_level to match the search view level focus region size
+            downsampled_image = image.resize(
+                (
+                    search_view_focus_regions_size,
+                    search_view_focus_regions_size,
+                )
+            )
+
+            focus_region = FocusRegion(
+                downsampled_coordinate=focus_region_coord,
+                downsampled_image=downsampled_image,
+            )
+
+            focus_region.get_image(image, padded_image)
+
+            focus_regions.append(focus_region)
 
         return focus_regions
