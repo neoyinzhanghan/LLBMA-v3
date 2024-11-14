@@ -1024,11 +1024,11 @@ class BMACounter:
 
             if self.focus_regions is None:
                 self.find_focus_regions()
+                import sys
+
+                sys.exit()
+
                 self.filter_focus_regions()
-
-            import sys
-
-            sys.exit()
 
             if self.wbc_candidates is None:
                 self.find_wbc_candidates()
