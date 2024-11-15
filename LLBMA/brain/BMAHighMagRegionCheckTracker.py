@@ -186,12 +186,9 @@ class BMAHighMagRegionCheckTracker:
 
         self.focus_regions = new_focus_regions
 
-        # except Exception as e:
-        #     print(f"Error occurred: {e}")
-
-        ray.shutdown()
-
-        self.focus_regions = new_focus_regions
+        print(
+            f"Number of focus regions after high magnification check: {len(self.focus_regions)}"
+        )
 
         # populate the info_df with the information of the focus regions
         info_dct = {
@@ -219,6 +216,10 @@ class BMAHighMagRegionCheckTracker:
         # --adequate_confidence_score_high_mag: the confidence score of the focus region at high magnification
 
         self.info_df = pd.DataFrame(info_dct)
+
+        print(
+            f"Number of selected focus regions after high magnification check: {len(self.info_df[self.info_df['selected_high_mag']])}"
+        )
 
     def get_good_focus_regions(self):
         """The criterion for a good focus region is that it has an adequate confidence score at high magnification:
