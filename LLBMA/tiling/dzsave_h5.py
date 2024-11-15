@@ -94,7 +94,7 @@ def initialize_final_h5py_file(
         os.remove(h5_path)
 
     # Create the HDF5 file and dataset
-    with h5py.File(h5_path, "w") as f:
+    with h5py.File(h5_path, "w", libver="latest") as f:
         f.swmr_mode = True
         # Create dataset with shape (num_tile_rows, num_tile_columns, patch_size, patch_size, 3)
         for level in range(num_levels + 1):
