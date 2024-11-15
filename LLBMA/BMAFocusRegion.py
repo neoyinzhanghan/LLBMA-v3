@@ -31,7 +31,6 @@ class FocusRegion:
     - adequate_confidence_score : the confidence score of the region classification model
     - downsampled_coordinate : the coordinate of the focus region in the downsampled view in the format of (TL_x, TL_y, BR_x, BR_y)
     - downsampled_image : the downsampled image of the focus region
-    - padded_image : the padded image of the focus region
     - image_mask_duo : one image where the downsampled image and mask are put side by side
     - VoL_high_mag : the variance of the laplacian of the high magnification image of the focus region
     - adequate_confidence_score_high_mag : the confidence score of the region classification model for the high magnification image

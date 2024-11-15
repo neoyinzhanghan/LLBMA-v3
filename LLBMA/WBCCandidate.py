@@ -23,7 +23,6 @@ class WBCCandidate:
     - YOLO_bbox_image : The image of the candidate, in the level_0 view of the PBCounter object containing this candidate.
 
     - snap_shot : The snap shot of the candidate, in the search_view of the PBCounter object containing this candidate.
-    - padded_YOLO_bbox_image : The padded bounding box of the candidate, cropped and zero padded to have square dimension of snap_shot_size
 
     - confidence : The confidence of the candidate, in the search_view of the PBCounter object containing this candidate.
     - VoL : The variance of laplacian of the snap shot of the candidate, in the level_0 view of the PBCounter object containing this candidate.
@@ -52,7 +51,7 @@ class WBCCandidate:
     ):
         """Initialize a WBCCandidate object."""
 
-        self.local_idx = int(local_idx) 
+        self.local_idx = int(local_idx)
         self.focus_region_idx = int(focus_region_idx)
 
         self.snap_shot_bbox = snap_shot_bbox
@@ -60,7 +59,6 @@ class WBCCandidate:
         self.YOLO_bbox_image = YOLO_bbox_image
 
         self.snap_shot = snap_shot
-        self.padded_YOLO_bbox_image = padded_YOLO_bbox_image
         self.VoL = VoL(snap_shot)
 
         self.confidence = confidence

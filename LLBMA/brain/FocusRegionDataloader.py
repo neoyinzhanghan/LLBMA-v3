@@ -33,11 +33,10 @@ class HighMagFocusRegionDataset(torch.utils.data.Dataset):
 
 
 def custom_collate_function(batch):
-    """A custom collate function that returns the focus regions and the padded images as a batch."""
+    """A custom collate function that returns the focus regions and the images as a batch."""
     focus_regions = [item[0] for item in batch]
     images_tensors = [item[1] for item in batch]
 
-    # stack the padded images tensors into a batch
     images_batch = torch.stack(images_tensors)
 
     return focus_regions, images_batch
