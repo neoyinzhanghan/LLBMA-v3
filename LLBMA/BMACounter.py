@@ -311,7 +311,7 @@ class BMACounter:
         # get the dimension of the highest mag, which is the level 0
         # get the level 0 dimension using
         wsi = openslide.OpenSlide(self.wsi_path)
-        search_view_dimension = wsi.level_dimensions[search_view_level]
+        search_view_dimension = wsi.level_dimensions[0]
         wsi.close()
 
         dimx, dimy = search_view_dimension
@@ -321,11 +321,11 @@ class BMACounter:
         num_focus_regions_y = dimy // search_view_focus_regions_size
 
         # get the list of focus regions coordinates
-        focus_regions_coordinates = []
+        search_view_focus_regions_coordinates = []
 
         for i in range(num_focus_regions_x):
             for j in range(num_focus_regions_y):
-                focus_regions_coordinates.append(
+                search_view_focus_regions_coordinates.append(
                     (
                         i * search_view_focus_regions_size,
                         j * search_view_focus_regions_size,
@@ -334,8 +334,10 @@ class BMACounter:
                     )
                 )
 
-        focus_regions_coordinates = self.top_view.filter_coordinates_with_mask(
-            focus_regions_coordinates
+        search_view_focus_regions_coordinates = (
+            self.top_view.filter_coordinates_with_mask(
+                search_view_focus_regions_coordinates
+            )
         )
 
         # # take the 300 focus regions from the middle of the list which is len(focus_regions_coordinates) // 2 - 150 to len(focus_regions_coordinates) // 2 + 150
@@ -352,6 +354,16 @@ class BMACounter:
             num_gpus=num_gpus,
             runtime_env={"env_vars": {"HDF5_USE_FILE_LOCKING": "FALSE"}},
         )
+
+        focus_regions_coordinates = [
+            (
+                coord[0] * (2**search_view_level),
+                coord[1] * (2**search_view_level),
+                coord[2] * (2**search_view_level),
+                coord[3] * (2**search_view_level),
+            )
+            for coord in search_view_focus_regions_coordinates
+        ]
 
         list_of_batches = create_list_of_batches_from_list(
             focus_regions_coordinates, region_cropping_batch_size
@@ -383,10 +395,10 @@ class BMACounter:
                 for done_id in done_ids:
                     try:
                         batch = ray.get(done_id)
-                        for focus_region in batch:
-                            all_results.append(focus_region)
 
-                            pbar.update()
+                        all_results.extend(batch)
+
+                        pbar.update(len(batch))
 
                     except RayTaskError as e:
                         self.error = True

@@ -220,6 +220,7 @@ def retrieve_tile_h5(h5_path, level, row, col):
 
 #         return downsampled_image
 
+
 # @ray.remote
 class h5_reader:
     """

@@ -233,7 +233,7 @@ class WSICropManager:
         return image
 
     def async_get_bma_focus_region_level_pair_batch(
-        self, focus_region_coords_level_pairs, crop_size=256
+        self, focus_region_coords_level_pairs, crop_size=512
     ):
         """Save a list of focus regions."""
 
@@ -262,7 +262,7 @@ def crop_wsi_images_all_levels(
     wsi_path,
     h5_path,
     region_cropping_batch_size,
-    crop_size=256,
+    crop_size=512,
     verbose=True,
     num_cpus=32,
 ):
