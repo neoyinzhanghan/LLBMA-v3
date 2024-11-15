@@ -25,7 +25,7 @@ from LLBMA.BMATopView import TopView, SpecimenError, TopViewError
 from LLBMA.brain.labeller.HemeLabelLightningManager import HemeLabelLightningManager
 from LLBMA.brain.BMAYOLOManager import YOLOManager
 from LLBMA.vision.processing import SlideError, read_with_timeout
-from LLBMA.vision.BMAWSICropManager import WSICropManager
+from LLBMA.vision.BMAWSICropManager import WSIH5FocusRegionCreationManager
 from LLBMA.communication.write_config import *
 from LLBMA.communication.visualization import *
 from LLBMA.brain.utils import *
@@ -353,7 +353,8 @@ class BMACounter:
         if self.verbose:
             print("Initializing WSICropManager")
         task_managers = [
-            WSICropManager.remote(self.wsi_path) for _ in range(num_croppers)
+            WSIH5FocusRegionCreationManager.remote(self.wsi_path)
+            for _ in range(num_croppers)
         ]
 
         tasks = {}
