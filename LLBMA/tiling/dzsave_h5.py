@@ -299,6 +299,7 @@ def crop_wsi_images_all_levels(
         )
         tasks[task] = batch
     with h5py.File(h5_path, "a") as f:
+        f.swmr_mode = True
         with tqdm(
             total=len(focus_regions_coordinates), desc="Cropping focus regions"
         ) as pbar:
@@ -357,6 +358,7 @@ def get_depth_from_0_to_11(wsi_path, h5_path, tile_size=256):
 
                 # Save the patch to the h5 file
                 with h5py.File(h5_path, "a") as f:
+                    f.swmr_mode = True
                     jpeg_string = image_to_jpeg_string(patch)
                     jpeg_string = encode_image_to_base64(jpeg_string)
                     try:
@@ -412,6 +414,7 @@ def dzsave_h5(
 
 def retrieve_tile_h5(h5_path, level, row, col):
     with h5py.File(h5_path, "r") as f:
+        f.swmr_mode = True
         try:
             jpeg_string = f[str(level)][row, col]
             jpeg_string = decode_image_from_base64(jpeg_string)
