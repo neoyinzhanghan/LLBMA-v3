@@ -375,7 +375,7 @@ class BMACounter:
             tasks[task] = batch
 
         with tqdm(
-            total=len(focus_regions_coordinates), desc="Cropping focus regions"
+            total=len(focus_regions_coordinates), desc="Gathering focus regions"
         ) as pbar:
             while tasks:
                 done_ids, _ = ray.wait(list(tasks.keys()))
