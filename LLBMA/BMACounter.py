@@ -430,53 +430,53 @@ class BMACounter:
         else:
             self.profiling_data["hoarding_focus_regions_time"] = 0
 
-        # now for each focus region, we will find get the image
+        # # now for each focus region, we will find get the image
 
-        start_time = time.time()
+        # start_time = time.time()
 
-        for focus_region in tqdm(
-            self.focus_regions, desc="Getting high magnification focus region images"
-        ):
-            wsi = openslide.OpenSlide(self.wsi_path)
+        # for focus_region in tqdm(
+        #     self.focus_regions, desc="Getting high magnification focus region images"
+        # ):
+        #     wsi = openslide.OpenSlide(self.wsi_path)
 
-            pad_size = snap_shot_size // 2
+        #     pad_size = snap_shot_size // 2
 
-            padded_coordinate = (
-                focus_region.coordinate[0] - pad_size,
-                focus_region.coordinate[1] - pad_size,
-                focus_region.coordinate[2] + pad_size,
-                focus_region.coordinate[3] + pad_size,
-            )
-            padded_image = wsi.read_region(
-                padded_coordinate,
-                0,
-                (
-                    focus_region.coordinate[2]
-                    - focus_region.coordinate[0]
-                    + pad_size * 2,
-                    focus_region.coordinate[3]
-                    - focus_region.coordinate[1]
-                    + pad_size * 2,
-                ),
-            )
+        #     padded_coordinate = (
+        #         focus_region.coordinate[0] - pad_size,
+        #         focus_region.coordinate[1] - pad_size,
+        #         focus_region.coordinate[2] + pad_size,
+        #         focus_region.coordinate[3] + pad_size,
+        #     )
+        #     padded_image = wsi.read_region(
+        #         padded_coordinate,
+        #         0,
+        #         (
+        #             focus_region.coordinate[2]
+        #             - focus_region.coordinate[0]
+        #             + pad_size * 2,
+        #             focus_region.coordinate[3]
+        #             - focus_region.coordinate[1]
+        #             + pad_size * 2,
+        #         ),
+        #     )
 
-            original_width = focus_region.coordinate[2] - focus_region.coordinate[0]
-            original_height = focus_region.coordinate[3] - focus_region.coordinate[1]
+        #     original_width = focus_region.coordinate[2] - focus_region.coordinate[0]
+        #     original_height = focus_region.coordinate[3] - focus_region.coordinate[1]
 
-            unpadded_image = padded_image.crop(
-                (
-                    pad_size,
-                    pad_size,
-                    pad_size + original_width,
-                    pad_size + original_height,
-                )
-            )
+        #     unpadded_image = padded_image.crop(
+        #         (
+        #             pad_size,
+        #             pad_size,
+        #             pad_size + original_width,
+        #             pad_size + original_height,
+        #         )
+        #     )
 
-            focus_region.get_image(unpadded_image, padded_image)
+        #     focus_region.get_image(unpadded_image, padded_image)
 
-        self.profiling_data["getting_high_mag_images_time"] = time.time() - start_time
+        # self.profiling_data["getting_high_mag_images_time"] = time.time() - start_time
 
-        start_time = time.time()
+        # start_time = time.time()
 
         high_mag_check_tracker = BMAHighMagRegionCheckTracker(
             focus_regions=self.focus_regions,

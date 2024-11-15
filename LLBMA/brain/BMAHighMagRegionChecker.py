@@ -347,7 +347,7 @@ class BMAHighMagRegionCheckerBatched:
             > high_mag_region_clf_threshold
         ]
 
-        return focus_regions, len()
+        return focus_regions, len(good_focus_regions)
 
 
 @ray.remote(num_gpus=1)

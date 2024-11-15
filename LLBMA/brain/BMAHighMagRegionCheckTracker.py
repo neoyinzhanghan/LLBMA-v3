@@ -55,6 +55,10 @@ class BMAHighMagRegionCheckTracker:
             for _ in range(num_region_clf_managers)
         ]
 
+        tasks = {}
+        new_focus_regions = []
+        total_found = 0
+
         with tqdm(
             total=len(focus_regions),
             desc="Getting high magnification focus regions diagnostics...",
@@ -64,23 +68,58 @@ class BMAHighMagRegionCheckTracker:
                 desc="Getting high magnification focus regions diagnostics...",
             ) as pbar_R:
 
-                for high_mag_checker in high_mag_checkers:
-                    batch = next(iter(dataloader))
-                    tasks[high_mag_checker] = (
-                        high_mag_checker.async_check_high_mag_score.remote(batch)
-                    )
+                # Iterate through the dataloader
+                data_iter = iter(dataloader)
 
-                    while tasks:
-                        done, _ = ray.wait(list(tasks.values()), timeout=0.1)
-                        for done_task_id in done:
+                try:
+                    while True:
+                        # Stop sending batches if the total found regions exceed max_num_focus_regions
+                        if total_found >= max_num_focus_regions:
+                            break
+
+                        # Send a batch to each worker if possible
+                        for high_mag_checker in high_mag_checkers:
                             try:
-                                focus_regions, num_found = ray.get(tasks[done_task_id])
-                                new_focus_regions.append(focus_region)
-                                pbar_R.update(num_found)
-                                pbar_N.update(len(focus_regions))
-                            except RayTaskError as e:
-                                print(e)
-                            del tasks[done_task_id]
+                                batch = next(data_iter)  # Get the next batch
+                            except StopIteration:
+                                break  # Dataloader is exhausted
+
+                            # Assign batch to the worker
+                            tasks[high_mag_checker] = (
+                                high_mag_checker.async_check_high_mag_score.remote(
+                                    batch
+                                )
+                            )
+
+                        # Process completed tasks
+                        while tasks:
+                            done, _ = ray.wait(list(tasks.values()), timeout=0.1)
+                            for done_task_id in done:
+                                try:
+                                    # Retrieve results from Ray task
+                                    focus_regions, num_found = ray.get(done_task_id)
+                                    new_focus_regions.extend(focus_regions)
+                                    total_found += num_found
+
+                                    # Update progress bars
+                                    pbar_R.update(num_found)
+                                    pbar_N.update(len(focus_regions))
+
+                                    # Stop further processing if max_num_focus_regions is reached
+                                    if total_found >= max_num_focus_regions:
+                                        tasks.clear()  # Cancel remaining tasks
+                                        break
+                                except RayTaskError as e:
+                                    print(e)
+                                finally:
+                                    # Remove completed task from the dictionary
+                                    del tasks[done_task_id]
+
+                            if total_found >= max_num_focus_regions:
+                                break
+
+                except Exception as e:
+                    print(f"Error occurred: {e}")
 
         ray.shutdown()
 
