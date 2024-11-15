@@ -279,32 +279,32 @@ def predict_image(model, image):
     return float(confidence_score[0])
 
 
-@ray.remote(num_gpus=1)
-class BMAHighMagRegionChecker:
-    def __init__(self, ckpt_path):
-        self.model = load_model_checkpoint(ckpt_path)
-        self.model.eval()
-        # move the model to the GPU
-        self.model.to("cuda")
+# @ray.remote(num_gpus=1)
+# class BMAHighMagRegionChecker:
+#     def __init__(self, ckpt_path):
+#         self.model = load_model_checkpoint(ckpt_path)
+#         self.model.eval()
+#         # move the model to the GPU
+#         self.model.to("cuda")
 
-    def resnet_check(self, focus_region):
-        image = focus_region.image
-        confidence = predict_image(self.model, image)
-        focus_region.adequate_confidence_score_high_mag = confidence
-        return focus_region
+#     def resnet_check(self, focus_region):
+#         image = focus_region.image
+#         confidence = predict_image(self.model, image)
+#         focus_region.adequate_confidence_score_high_mag = confidence
+#         return focus_region
 
-    def VoL_check(self, focus_region):
-        vol = VoL(focus_region.image)
-        focus_region.VoL_high_mag = vol
-        return focus_region
+#     def VoL_check(self, focus_region):
+#         vol = VoL(focus_region.image)
+#         focus_region.VoL_high_mag = vol
+#         return focus_region
 
-    def check(self, focus_region):
-        focus_region = self.resnet_check(focus_region)
-        focus_region = self.VoL_check(focus_region)
-        return focus_region
+#     def check(self, focus_region):
+#         focus_region = self.resnet_check(focus_region)
+#         focus_region = self.VoL_check(focus_region)
+#         return focus_region
 
-    def check_batch(self, focus_regions):
-        return [self.check(focus_region) for focus_region in focus_regions]
+#     def check_batch(self, focus_regions):
+#         return [self.check(focus_region) for focus_region in focus_regions]
 
 
 @ray.remote(num_gpus=1)
@@ -353,51 +353,51 @@ class BMAHighMagRegionCheckerBatched:
         return focus_regions, len(good_focus_regions)
 
 
-@ray.remote(num_gpus=1)
-class BMAHighMagRegionCheckerBatchedWithDataLoader:
-    """
-    A class representing a manager that crops and checks high magnification regions.
-    --model_ckpt_path : the path to the checkpoint of the model
-    --model : the model object
-    --dataloader : the dataloader object
-    """
+# @ray.remote(num_gpus=1)
+# class BMAHighMagRegionCheckerBatchedWithDataLoader:
+#     """
+#     A class representing a manager that crops and checks high magnification regions.
+#     --model_ckpt_path : the path to the checkpoint of the model
+#     --model : the model object
+#     --dataloader : the dataloader object
+#     """
 
-    def __init__(self, model_ckpt_path, dataloader):
-        self.model = load_model_checkpoint(model_ckpt_path)
-        self.model.eval()
-        self.model.to("cuda")
-        self.dataloader = dataloader
+#     def __init__(self, model_ckpt_path, dataloader):
+#         self.model = load_model_checkpoint(model_ckpt_path)
+#         self.model.eval()
+#         self.model.to("cuda")
+#         self.dataloader = dataloader
 
-    def async_run_one_batch(self):
-        try:
-            batch = next(self.dataloader)
-        except StopIteration:
-            return []
+#     def async_run_one_batch(self):
+#         try:
+#             batch = next(self.dataloader)
+#         except StopIteration:
+#             return []
 
-        focus_regions, image_tensor_stack = batch
+#         focus_regions, image_tensor_stack = batch
 
-        # move the image tensor stack to the GPU
-        image_tensor_stack = image_tensor_stack.to("cuda")
+#         # move the image tensor stack to the GPU
+#         image_tensor_stack = image_tensor_stack.to("cuda")
 
-        # get the model outputs
-        with torch.no_grad():
-            logits = self.model(image_tensor_stack)
-            probs = torch.softmax(logits, dim=1)
+#         # get the model outputs
+#         with torch.no_grad():
+#             logits = self.model(image_tensor_stack)
+#             probs = torch.softmax(logits, dim=1)
 
-            inadequate_confidence_scores = probs[:, 1].cpu().numpy()
+#             inadequate_confidence_scores = probs[:, 1].cpu().numpy()
 
-            adequate_confidence_scores = 1 - inadequate_confidence_scores
+#             adequate_confidence_scores = 1 - inadequate_confidence_scores
 
-        for i, focus_region in enumerate(focus_regions):
-            focus_region.adequate_confidence_score_high_mag = (
-                adequate_confidence_scores[i]
-            )
+#         for i, focus_region in enumerate(focus_regions):
+#             focus_region.adequate_confidence_score_high_mag = (
+#                 adequate_confidence_scores[i]
+#             )
 
-        good_focus_regions = [
-            focus_region
-            for focus_region in focus_regions
-            if focus_region.adequate_confidence_score_high_mag
-            > high_mag_region_clf_threshold
-        ]
+#         good_focus_regions = [
+#             focus_region
+#             for focus_region in focus_regions
+#             if focus_region.adequate_confidence_score_high_mag
+#             > high_mag_region_clf_threshold
+#         ]
 
-        return focus_regions, len(good_focus_regions)
+#         return focus_regions, len(good_focus_regions)
