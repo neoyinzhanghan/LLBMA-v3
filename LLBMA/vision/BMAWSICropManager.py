@@ -124,44 +124,40 @@ class WSICropManager:
         return focus_regions
 
 
-# @ray.remote(num_cpus=num_cpus_per_cropper)
 @ray.remote
 class WSIH5FocusRegionCreationManager:
-    """A class representing a manager that create focus regions from h5 dzsaved source.
-
-    === Class Attributes ===
-    - h5_path : the path to the h5 file
-    - h5_reader : the h5 reader
-    """
+    """A class representing a manager that creates focus regions from h5 dzsaved source."""
 
     def __init__(self, h5_path) -> None:
         self.h5_path = h5_path
         self.h5_reader = h5_reader.remote(h5_path)
-        self.h5_reader.open()
+        self.h5_reader.open.remote()
 
     def async_get_bma_focus_region_batch(self, focus_region_coords):
         """Return a list of focus regions."""
-
         focus_regions = []
         for focus_region_coord in focus_region_coords:
 
-            image = self.h5_reader.read_region_level_0(
+            # Get the region level 0 image
+            image_ref = self.h5_reader.read_region_level_0.remote(
                 TL_x=focus_region_coord[0],
                 TL_y=focus_region_coord[1],
             )
+            image = ray.get(image_ref)  # Fetch the result
 
             # Define the padding size (half of `snap_shot_size`)
             padding_size = snap_shot_size // 2
 
             # Add padding around the image with black pixels
             padded_image = ImageOps.expand(image, border=padding_size, fill="black")
-            # padded_image = image
 
-            # downsampling the image by a factor of 2 ** search_view_level to match the search view level focus region size
-            downsampled_image = self.h5_reader.read_region_search_view_level(
+            # Get the downsampled image
+            downsampled_image_ref = self.h5_reader.read_region_search_view_level.remote(
                 TL_x=focus_region_coord[0],
                 TL_y=focus_region_coord[1],
             )
+            downsampled_image = ray.get(downsampled_image_ref)  # Fetch the result
+
             focus_region = FocusRegion(
                 downsampled_coordinate=focus_region_coord,
                 downsampled_image=downsampled_image,
