@@ -145,8 +145,7 @@ class WSIH5FocusRegionCreationManager:
         focus_regions = []
         for focus_region_coord in focus_region_coords:
 
-            image = self.h5_reader.read_region(
-                level=0,
+            image = self.h5_reader.read_region_level_0(
                 TL_x=focus_region_coord[0],
                 TL_y=focus_region_coord[1],
             )

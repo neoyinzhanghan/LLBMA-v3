@@ -3,7 +3,12 @@ import h5py
 import base64
 import numpy as np
 from PIL import Image
-from LLBMA.resources.BMAassumptions import focus_regions_size, max_dzsave_level
+from LLBMA.resources.BMAassumptions import (
+    focus_regions_size,
+    max_dzsave_level,
+    search_view_level,
+    search_view_crop_size,
+)
 
 
 def image_to_jpeg_string(image):
@@ -57,9 +62,6 @@ def retrieve_tile_h5(h5_path, level, row, col):
             print(f"jpeg_string base 64 decoded: {jpeg_string}")
             raise e
         return image
-
-
-import h5py
 
 
 # class h5_reader:
@@ -182,6 +184,21 @@ class h5_reader:
             self.f.close()
             self.f = None
 
+    def get_level_0_width(self):
+        return self.f["level_0_width"][0]
+
+    def get_level_0_height(self):
+        return self.f["level_0_height"][0]
+
+    def get_max_level(self):
+        return self.f["num_levels"][0] - 1
+
+    def get_patch_size(self):
+        return self.f["patch_size"][0]
+
+    def get_overlap(self):
+        return self.f["overlap"][0]
+
     def retrieve_tile(self, level, row, col):
         """
         Retrieve a tile at the specified level, row, and column.
@@ -215,7 +232,7 @@ class h5_reader:
 
         return image
 
-    def read_region(self, open_slide_level, TL_x, TL_y):
+    def read_region_level_0(self, TL_x, TL_y):
         """
         Retrieve a region of tiles at the specified level and top left corner.
 
@@ -227,13 +244,87 @@ class h5_reader:
         Returns:
             The region of tiles as a numpy array.
         """
+
         if self.f is None:
             raise RuntimeError(
                 "H5 file is not open. Please call open() before retrieving tiles."
             )
 
         row, col = TL_x // focus_regions_size, TL_y // focus_regions_size
-        level = max_dzsave_level - open_slide_level
+        level = max_dzsave_level
         image = self.retrieve_tile(level, row, col)
 
         return image
+
+    def read_region_search_view_level(self, TL_x, TL_y):
+        """
+        Retrieve a region of tiles at the search view level and top left corner.
+
+        Parameters:
+            level (int): The zoom level of the tile.
+            TL_x (int): The x coordinate of the top left corner of the region at level 0.
+            TL_y (int): The y coordinate of the top left corner of the region at level 0.
+
+        Returns:
+            The region of tiles as a numpy array.
+        """
+
+        if self.f is None:
+            raise RuntimeError(
+                "H5 file is not open. Please call open() before retrieving tiles."
+            )
+
+        row, col = TL_x // (focus_regions_size * (2**search_view_level)), TL_y // (
+            focus_regions_size * (2**search_view_level)
+        )
+
+        level = max_dzsave_level - search_view_level
+        image = self.retrieve_tile(level, row, col)
+
+        remainder_x = TL_x % (focus_regions_size * (2**search_view_level))
+        remainder_y = TL_y % (focus_regions_size * (2**search_view_level))
+
+        offset_x = remainder_x // search_view_crop_size
+        offset_y = remainder_y // search_view_crop_size
+
+        downsampled_image = image.crop(
+            (
+                offset_x * search_view_crop_size,
+                offset_y * search_view_crop_size,
+                (offset_x + 1) * search_view_crop_size,
+                (offset_y + 1) * search_view_crop_size,
+            )
+        )
+
+        return downsampled_image
+
+
+if __name__ == "__main__":
+    h5_path = (
+        "/home/greg/Documents/neo/cp-lab-wsi-upload/wsi-and-heatmaps/bma_test_slide.h5"
+    )
+    h5 = h5_reader(h5_path)
+
+    save_dir = "/media/hdd3/neo"
+
+    h5.open()
+
+    # randomly select a level_0 tile coordinate
+    level_0_width = h5.get_level_0_width()
+    level_0_height = h5.get_level_0_height()
+
+    TL_x = (
+        np.random.randint(0, level_0_width // focus_regions_size) * focus_regions_size
+    )
+
+    TL_y = (
+        np.random.randint(0, level_0_height // focus_regions_size) * focus_regions_size
+    )
+
+    image = h5.read_region_level_0(TL_x, TL_y)
+
+    downsampled_image = h5.read_region_search_view_level(TL_x, TL_y)
+
+    # save the image to disk
+    image.save(f"{save_dir}/LLBMA_test_FR_level_0_tile.jpg")
+    downsampled_image.save(f"{save_dir}/LLBMA_test_FR_search_view_tile.jpg")
