@@ -352,6 +352,8 @@ class BMACounter:
 
         if self.verbose:
             print("Initializing WSICropManager")
+
+        num_croppers = 1
         task_managers = [
             WSIH5FocusRegionCreationManager.remote(self.wsi_path)
             for _ in range(num_croppers)
@@ -361,7 +363,7 @@ class BMACounter:
         all_results = []
 
         for i, batch in enumerate(list_of_batches):
-            manager = task_managers[i % num_labellers]
+            manager = task_managers[i % num_croppers]
             task = manager.async_get_bma_focus_region_batch.remote(batch)
             tasks[task] = batch
 
