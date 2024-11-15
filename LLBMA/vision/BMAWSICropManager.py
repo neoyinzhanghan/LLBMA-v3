@@ -150,13 +150,6 @@ class WSIH5FocusRegionCreationManager:
                 TL_y=focus_region_coord[1],
             )
 
-            # Define the padding size (half of `snap_shot_size`)
-            padding_size = snap_shot_size // 2
-
-            # Add padding around the image with black pixels
-            # padded_image = ImageOps.expand(image, border=padding_size, fill="black")
-            padded_image = image
-
             # downsampling the image by a factor of 2 ** search_view_level to match the search view level focus region size
             # downsampled_image = self.h5_reader.read_region_search_view_level(
             #     TL_x=focus_region_coord[0],
@@ -175,7 +168,7 @@ class WSIH5FocusRegionCreationManager:
                 downsampled_image=downsampled_image,
             )
 
-            focus_region.get_image(image, padded_image)
+            focus_region.get_image(image)
 
             focus_regions.append(focus_region)
 
