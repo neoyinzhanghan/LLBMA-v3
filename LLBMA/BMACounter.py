@@ -62,6 +62,7 @@ class BMACounter:
 
     - predicted_specimen_type: the predicted specimen type of the WSI
     - wsi_path : the path to the WSI
+    - h5_path : the path to the h5 file of the WSI
 
     - dump_dir : the directory to save the diagnostic logs, dataframes (and images if hoarding is True
     """
@@ -98,6 +99,7 @@ class BMACounter:
         self.error = error
         self.extra_hoarding = extra_hoarding
         self.keep_h5 = keep_h5
+        self.h5_path = None
 
         # The focus regions and WBC candidates are None until they are processed
         self.focus_regions = None
@@ -288,6 +290,8 @@ class BMACounter:
         dzsave_path = os.path.join(self.save_dir, "slide.h5")
         dzsave_h5(self.wsi_path, dzsave_path)
 
+        self.h5_path = dzsave_path
+
     def delete_dzsave(self):
         """
         Delete the dzsave of the slide at the save_dir.
@@ -343,8 +347,11 @@ class BMACounter:
         # ]
 
         ray.shutdown()
-        # ray.init(num_cpus=num_cpus, num_gpus=num_gpus)
-        ray.init(runtime_env={"env_vars": {"HDF5_USE_FILE_LOCKING": "FALSE"}})
+        ray.init(
+            num_cpus=num_cpus,
+            num_gpus=num_gpus,
+            runtime_env={"env_vars": {"HDF5_USE_FILE_LOCKING": "FALSE"}},
+        )
 
         list_of_batches = create_list_of_batches_from_list(
             focus_regions_coordinates, region_cropping_batch_size
@@ -355,7 +362,7 @@ class BMACounter:
 
         num_croppers = 1
         task_managers = [
-            WSIH5FocusRegionCreationManager.remote(self.wsi_path)
+            WSIH5FocusRegionCreationManager.remote(self.h5_path)
             for _ in range(num_croppers)
         ]
 
