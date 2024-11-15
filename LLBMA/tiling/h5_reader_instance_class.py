@@ -1,4 +1,5 @@
 import io
+import ray
 import h5py
 import base64
 import numpy as np
@@ -219,7 +220,7 @@ def retrieve_tile_h5(h5_path, level, row, col):
 
 #         return downsampled_image
 
-
+@ray.remote
 class h5_reader:
     """
     A class for reading tiles from an H5 file.

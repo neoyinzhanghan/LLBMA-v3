@@ -136,7 +136,7 @@ class WSIH5FocusRegionCreationManager:
 
     def __init__(self, h5_path) -> None:
         self.h5_path = h5_path
-        self.h5_reader = h5_reader(h5_path)
+        self.h5_reader = h5_reader.remote(h5_path)
         self.h5_reader.open()
 
     def async_get_bma_focus_region_batch(self, focus_region_coords):
