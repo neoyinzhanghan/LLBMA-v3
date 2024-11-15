@@ -205,6 +205,9 @@ class BMAHighMagRegionCheckTracker:
             f"Number of selected focus regions after high magnification check: {len(self.info_df[self.info_df['selected_high_mag']])}"
         )
 
+        # save the df in the /media/hdd3/test_high_mag_focus_regions_info.csv
+        # self.info_df.to_csv("/media/hdd3/test_high_mag_focus_regions_info.csv")
+
     def get_good_focus_regions(self):
         """The criterion for a good focus region is that it has an adequate confidence score at high magnification:
         - VoL_high_mag > 7

@@ -23,13 +23,10 @@ class HighMagFocusRegionDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.focus_regions)
 
-    def __getitem__(self, idx):
-        focus_region = self.focus_regions[idx]
-
-        # use transform.ToTensor() to transform the image to a tensor
-        image_tensor = transforms.ToTensor()(focus_region.image)
-
-        return focus_region, image_tensor
+    def __getitem__(self, index):
+        return self.focus_regions[index], transforms.ToTensor()(
+            self.focus_regions[index].image
+        )
 
 
 def custom_collate_function(batch):
@@ -59,25 +56,25 @@ def get_high_mag_focus_region_dataloader(
     return high_mag_focus_region_dataloader
 
 
-def get_alternating_high_mag_focus_region_dataloader(
-    focus_regions,
-    wsi_path,
-    num_data_loaders=num_region_clf_managers,
-    batch_size=region_clf_batch_size,
-    num_workers=num_croppers,
-):
+# def get_alternating_high_mag_focus_region_dataloader(
+#     focus_regions,
+#     wsi_path,
+#     num_data_loaders=num_region_clf_managers,
+#     batch_size=region_clf_batch_size,
+#     num_workers=num_croppers,
+# ):
 
-    list_of_lists_of_focus_regions = [[] for _ in range(num_data_loaders)]
-    for i, focus_region in enumerate(focus_regions):
-        list_idx = i % num_data_loaders
-        list_of_lists_of_focus_regions[list_idx].append(focus_region)
+#     list_of_lists_of_focus_regions = [[] for _ in range(num_data_loaders)]
+#     for i, focus_region in enumerate(focus_regions):
+#         list_idx = i % num_data_loaders
+#         list_of_lists_of_focus_regions[list_idx].append(focus_region)
 
-    dataloaders = []
+#     dataloaders = []
 
-    for focus_regions in list_of_lists_of_focus_regions:
-        dataloader = get_high_mag_focus_region_dataloader(
-            focus_regions, wsi_path, batch_size, num_workers
-        )
-        dataloaders.append(dataloader)
+#     for focus_regions in list_of_lists_of_focus_regions:
+#         dataloader = get_high_mag_focus_region_dataloader(
+#             focus_regions, wsi_path, batch_size, num_workers
+#         )
+#         dataloaders.append(dataloader)
 
-    return dataloaders
+#     return dataloaders
