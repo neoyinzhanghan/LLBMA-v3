@@ -15,11 +15,7 @@ assumed_mpp_level_0 = 0.2297952524300848
 assumed_search_view_downsample_rate = 8
 assumed_top_view_downsample_rate = 128
 
-search_view_crop_size = (
-    1536,
-    768,
-)  # I am pretty sure this is only used for the peripheral blood counter pipeline so not relevant here
-
+search_view_crop_size = 512
 #######################
 ### Quality Control ###
 #######################
