@@ -340,6 +340,9 @@ class BMAHighMagRegionCheckerBatched:
                 adequate_confidence_scores[i]
             )
 
+            vol = VoL(focus_region.image)
+            focus_region.VoL_high_mag = vol
+
         good_focus_regions = [
             focus_region
             for focus_region in focus_regions
