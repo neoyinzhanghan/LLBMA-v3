@@ -50,7 +50,7 @@ class FocusRegion:
         )
         self.downsampled_image = downsampled_image
         self.image = None
-        self.padded_image = None
+        # self.padded_image = None
         self.annotated_image = None
 
         # calculate the downsampled coordinateF
@@ -87,18 +87,14 @@ class FocusRegion:
         VoL_high_mag = None
         adequate_confidence_score_high_mag = None
 
-    def get_image(self, image, padded_image):
+    def get_image(self, image):
         """Update the image of the focus region."""
 
         # if the image is RGBA, convert it to RGB
         if image.mode == "RGBA":
             image = image.convert("RGB")
 
-        if padded_image.mode == "RGBA":
-            padded_image = padded_image.convert("RGB")
-
         self.image = image
-        self.padded_image = padded_image
 
     def get_annotated_image(self):
         """Return the image of the focus region annotated with the WBC candidates."""
@@ -111,27 +107,15 @@ class FocusRegion:
 
         else:
 
-            pad_size = snap_shot_size // 2
-
-            padded_wbc_candidate_bboxes = [
-                (
-                    bbox[0] + pad_size,
-                    bbox[1] + pad_size,
-                    bbox[2] + pad_size,
-                    bbox[3] + pad_size,
-                )
-                for bbox in self.wbc_candidate_bboxes
-            ]
-
             self.annotated_image = annotate_focus_region(
-                self.padded_image, padded_wbc_candidate_bboxes
+                self.image, self.wbc_candidate_bboxes
             )
 
             # Calculate the coordinates for the green rectangle
-            top_left = (pad_size, pad_size)
+            top_left = (0, 0)
             bottom_right = (
-                pad_size + focus_regions_size,
-                pad_size + focus_regions_size,
+                0 + focus_regions_size,
+                0 + focus_regions_size,
             )
 
             # Draw the green rectangle
