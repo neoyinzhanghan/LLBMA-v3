@@ -344,7 +344,7 @@ class BMACounter:
 
         ray.shutdown()
         # ray.init(num_cpus=num_cpus, num_gpus=num_gpus)
-        ray.init()
+        ray.init(_system_config={"env_vars": {"HDF5_USE_FILE_LOCKING": "FALSE"}})
 
         list_of_batches = create_list_of_batches_from_list(
             focus_regions_coordinates, region_cropping_batch_size
