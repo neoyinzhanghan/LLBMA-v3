@@ -147,39 +147,39 @@ class BMAHighMagRegionCheckTracker:
             # Iterate through the dataloader
             data_iter = iter(dataloader)
 
-            try:
-                while True:
-                    # Send a batch to each worker if possible
-                    for high_mag_checker in high_mag_checkers:
+            while True:
+                # Send a batch to each worker if possible
+                for high_mag_checker in high_mag_checkers:
+                    try:
+                        batch = next(data_iter)  # Get the next batch
+                    except StopIteration:
+                        break  # Dataloader is exhausted
+
+                    # Assign batch to the worker
+                    tasks[high_mag_checker] = (
+                        high_mag_checker.async_check_high_mag_score.remote(batch)
+                    )
+
+                # Process completed tasks
+                while tasks:
+                    done, _ = ray.wait(list(tasks.values()), timeout=0.1)
+                    for done_task_id in done:
                         try:
-                            batch = next(data_iter)  # Get the next batch
-                        except StopIteration:
-                            break  # Dataloader is exhausted
+                            # Retrieve results from Ray task
+                            focus_regions, _ = ray.get(done_task_id)
+                            new_focus_regions.extend(focus_regions)
 
-                        # Assign batch to the worker
-                        tasks[high_mag_checker] = (
-                            high_mag_checker.async_check_high_mag_score.remote(batch)
-                        )
+                            # Update progress bar
+                            pbar.update(len(focus_regions))
+                        except RayTaskError as e:
+                            print(e)
+                            raise e
+                        finally:
+                            # Remove completed task from the dictionary
+                            del tasks[done_task_id]
 
-                    # Process completed tasks
-                    while tasks:
-                        done, _ = ray.wait(list(tasks.values()), timeout=0.1)
-                        for done_task_id in done:
-                            try:
-                                # Retrieve results from Ray task
-                                focus_regions, _ = ray.get(done_task_id)
-                                new_focus_regions.extend(focus_regions)
-
-                                # Update progress bar
-                                pbar.update(len(focus_regions))
-                            except RayTaskError as e:
-                                print(e)
-                            finally:
-                                # Remove completed task from the dictionary
-                                del tasks[done_task_id]
-
-            except Exception as e:
-                print(f"Error occurred: {e}")
+            # except Exception as e:
+            #     print(f"Error occurred: {e}")
 
         ray.shutdown()
 
