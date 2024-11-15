@@ -158,17 +158,17 @@ class WSIH5FocusRegionCreationManager:
             padded_image = image
 
             # downsampling the image by a factor of 2 ** search_view_level to match the search view level focus region size
-            # downsampled_image = self.h5_reader.read_region_search_view_level(
-            #     TL_x=focus_region_coord[0],
-            #     TL_y=focus_region_coord[1],
-            # )
-
-            downsampled_image = image.resize(
-                (
-                    search_view_focus_regions_size,
-                    search_view_focus_regions_size,
-                )
+            downsampled_image = self.h5_reader.read_region_search_view_level(
+                TL_x=focus_region_coord[0],
+                TL_y=focus_region_coord[1],
             )
+
+            # downsampled_image = image.resize(
+            #     (
+            #         search_view_focus_regions_size,
+            #         search_view_focus_regions_size,
+            #     )
+            # )
             focus_region = FocusRegion(
                 downsampled_coordinate=focus_region_coord,
                 downsampled_image=downsampled_image,
