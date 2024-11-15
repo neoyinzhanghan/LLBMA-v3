@@ -154,13 +154,20 @@ class WSIH5FocusRegionCreationManager:
             padding_size = snap_shot_size // 2
 
             # Add padding around the image with black pixels
-            padded_image = ImageOps.expand(image, border=padding_size, fill="black")
-            # padded_image = image
+            # padded_image = ImageOps.expand(image, border=padding_size, fill="black")
+            padded_image = image
 
             # downsampling the image by a factor of 2 ** search_view_level to match the search view level focus region size
-            downsampled_image = self.h5_reader.read_region_search_view_level(
-                TL_x=focus_region_coord[0],
-                TL_y=focus_region_coord[1],
+            # downsampled_image = self.h5_reader.read_region_search_view_level(
+            #     TL_x=focus_region_coord[0],
+            #     TL_y=focus_region_coord[1],
+            # )
+
+            downsampled_image = image.resize(
+                (
+                    search_view_focus_regions_size,
+                    search_view_focus_regions_size,
+                )
             )
             focus_region = FocusRegion(
                 downsampled_coordinate=focus_region_coord,
@@ -174,54 +181,54 @@ class WSIH5FocusRegionCreationManager:
         return focus_regions
 
 
-class WSIH5FocusRegionCreationManagerSerial:
-    """A class representing a manager that create focus regions from h5 dzsaved source.
+# class WSIH5FocusRegionCreationManagerSerial:
+#     """A class representing a manager that create focus regions from h5 dzsaved source.
 
-    === Class Attributes ===
-    - h5_path : the path to the h5 file
-    - h5_reader : the h5 reader
-    """
+#     === Class Attributes ===
+#     - h5_path : the path to the h5 file
+#     - h5_reader : the h5 reader
+#     """
 
-    def __init__(self, h5_path) -> None:
-        self.h5_path = h5_path
-        self.h5_reader = h5_reader(h5_path)
-        self.h5_reader.open()
+#     def __init__(self, h5_path) -> None:
+#         self.h5_path = h5_path
+#         self.h5_reader = h5_reader(h5_path)
+#         self.h5_reader.open()
 
-    def get_bma_focus_region(self, focus_region_coord):
-        """Return a list of focus regions."""
+#     def get_bma_focus_region(self, focus_region_coord):
+#         """Return a list of focus regions."""
 
-        image = self.h5_reader.read_region_level_0(
-            TL_x=focus_region_coord[0],
-            TL_y=focus_region_coord[1],
-        )
+#         image = self.h5_reader.read_region_level_0(
+#             TL_x=focus_region_coord[0],
+#             TL_y=focus_region_coord[1],
+#         )
 
-        # Define the padding size (half of `snap_shot_size`)
-        padding_size = snap_shot_size // 2
+#         # Define the padding size (half of `snap_shot_size`)
+#         padding_size = snap_shot_size // 2
 
-        # Add padding around the image with black pixels
-        # padded_image = ImageOps.expand(image, border=padding_size, fill="black")
-        padded_image = image
+#         # Add padding around the image with black pixels
+#         # padded_image = ImageOps.expand(image, border=padding_size, fill="black")
+#         padded_image = image
 
-        # downsampling the image by a factor of 2 ** search_view_level to match the search view level focus region size
-        # downsampled_image = self.h5_reader.read_region_search_view_level(
-        #     TL_x=focus_region_coord[0],
-        #     TL_y=focus_region_coord[1],
-        # )
+#         # downsampling the image by a factor of 2 ** search_view_level to match the search view level focus region size
+#         # downsampled_image = self.h5_reader.read_region_search_view_level(
+#         #     TL_x=focus_region_coord[0],
+#         #     TL_y=focus_region_coord[1],
+#         # )
 
-        downsampled_image = image.resize(
-            (
-                search_view_focus_regions_size,
-                search_view_focus_regions_size,
-            )
-        )
-        focus_region = FocusRegion(
-            downsampled_coordinate=focus_region_coord,
-            downsampled_image=downsampled_image,
-        )
+#         downsampled_image = image.resize(
+#             (
+#                 search_view_focus_regions_size,
+#                 search_view_focus_regions_size,
+#             )
+#         )
+#         focus_region = FocusRegion(
+#             downsampled_coordinate=focus_region_coord,
+#             downsampled_image=downsampled_image,
+#         )
 
-        focus_region.get_image(image, padded_image)
+#         focus_region.get_image(image, padded_image)
 
-        return focus_region
+#         return focus_region
 
 
 # @ray.remote
