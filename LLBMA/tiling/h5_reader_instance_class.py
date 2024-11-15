@@ -281,8 +281,8 @@ class h5_reader:
         level = max_dzsave_level - search_view_level
         image = self.retrieve_tile(level, row, col)
 
-        remainder_x = TL_x % (focus_regions_size * (2**search_view_level))
-        remainder_y = TL_y % (focus_regions_size * (2**search_view_level))
+        remainder_x = (TL_x % (focus_regions_size * (2**search_view_level))) // 2 ** search_view_level
+        remainder_y = (TL_y % (focus_regions_size * (2**search_view_level))) // 2 ** search_view_level
 
         offset_x = remainder_x // search_view_crop_size
         offset_y = remainder_y // search_view_crop_size
