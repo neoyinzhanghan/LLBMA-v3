@@ -11,22 +11,52 @@ from torchvision import transforms
 
 
 class HighMagFocusRegionDataset(torch.utils.data.Dataset):
-    """A class that represents a dataset of focus regions.
-    === Attributes ===
-    - focus_regions: a list of focus regions objects
+    """
+    A PyTorch Dataset for high magnification focus regions.
 
+    Attributes:
+    - focus_regions (list): A list of focus region objects. Each focus region object must have an `image` attribute.
     """
 
     def __init__(self, focus_regions):
+        """
+        Initialize the dataset.
+
+        Args:
+        - focus_regions (list): A list of focus region objects with an `image` attribute.
+        """
         self.focus_regions = focus_regions
 
     def __len__(self):
+        """
+        Return the number of focus regions.
+
+        Returns:
+        - int: The length of the dataset.
+        """
         return len(self.focus_regions)
 
     def __getitem__(self, index):
-        return self.focus_regions[index], transforms.ToTensor()(
-            self.focus_regions[index].image
-        )
+        """
+        Retrieve a focus region and its corresponding image tensor.
+
+        Args:
+        - index (int): The index of the focus region.
+
+        Returns:
+        - tuple: A tuple containing the focus region object and its image as a tensor.
+        """
+        focus_region = self.focus_regions[index]
+        image = focus_region.image
+
+        # Ensure the image is valid before transforming
+        if image is None:
+            raise ValueError(f"Focus region at index {index} has no image.")
+
+        # Apply ToTensor transformation
+        tensor_image = transforms.ToTensor()(image)
+
+        return focus_region, tensor_image
 
 
 def custom_collate_function(batch):
