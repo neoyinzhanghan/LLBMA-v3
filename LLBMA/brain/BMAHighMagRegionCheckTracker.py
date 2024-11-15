@@ -32,16 +32,10 @@ class BMAHighMagRegionCheckTracker:
     === Class Attributes ===
     - focus_regions: a list of focus regions that made it past the low magnification checks
     - info_df: a pandas DataFrame that stores the information of the focus regions
-    - wsi_path: the path to the WSI
 
     """
 
-    def __init__(self, focus_regions, wsi_path) -> None:
-
-        self.wsi_path = wsi_path
-        tasks = {}
-        new_focus_regions = []
-
+    def __init__(self, focus_regions) -> None:
         sorted_focus_regions = sort_focus_regions_based_on_low_mag_score(focus_regions)
 
         # dataloader = get_high_mag_focus_region_dataloader(
@@ -125,9 +119,7 @@ class BMAHighMagRegionCheckTracker:
 
         # self.focus_regions = new_focus_regions
 
-        dataloader = get_high_mag_focus_region_dataloader(
-            sorted_focus_regions, wsi_path
-        )
+        dataloader = get_high_mag_focus_region_dataloader(sorted_focus_regions)
 
         high_mag_checkers = [
             BMAHighMagRegionCheckerBatched.remote(
@@ -139,26 +131,20 @@ class BMAHighMagRegionCheckTracker:
         tasks = {}
         new_focus_regions = []
 
+        # Assign all batches to workers
+        for i, batch in enumerate(dataloader):
+            # Assign each batch to a worker
+            worker_idx = i % len(high_mag_checkers)  # Round-robin assignment
+            high_mag_checker = high_mag_checkers[worker_idx]
+            task_id = high_mag_checker.async_check_high_mag_score.remote(batch)
+            tasks[task_id] = high_mag_checker  # Use ObjectRef as the key
+
+        # Track progress with tqdm
         with tqdm(
             total=len(focus_regions),
             desc="Getting high magnification focus regions diagnostics...",
         ) as pbar:
-
-            # Iterate through the dataloader
-            data_iter = iter(dataloader)
-
             try:
-                # Send a batch to each worker if possible
-                for high_mag_checker in high_mag_checkers:
-                    try:
-                        batch = next(data_iter)  # Get the next batch
-                    except StopIteration:
-                        break  # Dataloader is exhausted
-
-                    # Assign batch to the worker
-                    task_id = high_mag_checker.async_check_high_mag_score.remote(batch)
-                    tasks[task_id] = high_mag_checker  # Use ObjectRef as the key
-
                 # Process completed tasks
                 while tasks:
                     done, _ = ray.wait(list(tasks.keys()), timeout=0.1)
@@ -172,6 +158,7 @@ class BMAHighMagRegionCheckTracker:
                             pbar.update(len(focus_regions))
                         except RayTaskError as e:
                             print(e)
+                            raise e
                         finally:
                             # Remove completed task from the dictionary
                             del tasks[done_task_id]  # Use ObjectRef as the key

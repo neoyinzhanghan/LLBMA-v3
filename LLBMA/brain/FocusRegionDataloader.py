@@ -17,7 +17,7 @@ class HighMagFocusRegionDataset(torch.utils.data.Dataset):
 
     """
 
-    def __init__(self, focus_regions, wsi_path):
+    def __init__(self, focus_regions):
         self.focus_regions = focus_regions
 
     def __len__(self):
@@ -43,10 +43,10 @@ def custom_collate_function(batch):
 
 
 def get_high_mag_focus_region_dataloader(
-    focus_regions, wsi_path, batch_size=region_clf_batch_size, num_workers=num_croppers
+    focus_regions, batch_size=region_clf_batch_size, num_workers=num_croppers
 ):
     """Return a dataloader of high magnification focus regions."""
-    high_mag_focus_region_dataset = HighMagFocusRegionDataset(focus_regions, wsi_path)
+    high_mag_focus_region_dataset = HighMagFocusRegionDataset(focus_regions)
 
     high_mag_focus_region_dataloader = torch.utils.data.DataLoader(
         high_mag_focus_region_dataset,
