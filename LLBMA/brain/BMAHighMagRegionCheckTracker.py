@@ -168,7 +168,7 @@ class BMAHighMagRegionCheckTracker:
                         for done_task_id in done:
                             try:
                                 # Retrieve results from Ray task
-                                focus_regions = ray.get(done_task_id)
+                                focus_regions, _ = ray.get(done_task_id)
                                 new_focus_regions.extend(focus_regions)
 
                                 # Update progress bar
