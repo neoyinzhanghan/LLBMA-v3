@@ -1,7 +1,12 @@
 import os
 from LLBMA.front_end.api import analyse_bma
 
-slide_path = "/media/hdd3/neo/error_slides_ndpi/H19-6490;S10;MSKM - 2023-12-11 21.02.14.ndpi"
+slide_path = (
+    "/media/hdd3/neo/error_slides_ndpi/H19-6490;S10;MSKM - 2023-12-11 21.02.14.ndpi"
+)
+pretiled_h5_path = (
+    "/media/hdd3/neo/error_slides_h5/H19-6490;S10;MSKM - 2023-12-11 21.02.14.h5"
+)
 dump_dir = "/media/hdd3/neo/test_error_results_dir"
 
 os.makedirs(dump_dir, exist_ok=True)
@@ -24,4 +29,5 @@ if __name__ == "__main__":
         continue_on_error=True,
         do_extract_features=False,
         check_specimen_clf=False,
+        pretiled_h5_pathß=pretiled_h5_path,
     )

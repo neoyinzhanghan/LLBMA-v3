@@ -79,6 +79,7 @@ class BMACounter:
         do_extract_features: bool = False,
         overwrite: bool = True,
         error: bool = False,
+        pretiled_h5_path: str = None,
         keep_h5: bool = True,
     ):
         """Initialize a BMACounter object."""
@@ -100,6 +101,7 @@ class BMACounter:
         self.extra_hoarding = extra_hoarding
         self.keep_h5 = keep_h5
         self.h5_path = None
+        self.pretiled_h5_path = pretiled_h5_path
 
         # The focus regions and WBC candidates are None until they are processed
         self.focus_regions = None
@@ -287,8 +289,13 @@ class BMACounter:
         """
         Create a dzsave of the slide at the save_dir.
         """
-        dzsave_path = os.path.join(self.save_dir, "slide.h5")
-        dzsave_h5(self.wsi_path, dzsave_path)
+
+        if self.pretiled_h5_path is not None:
+            dzsave_path = self.pretiled_h5_path
+            print(f"Using pretiled h5 file at {dzsave_path}. Skipping dzsave h5 step.")
+        else:
+            dzsave_path = os.path.join(self.save_dir, "slide.h5")
+            dzsave_h5(self.wsi_path, dzsave_path)
 
         self.h5_path = dzsave_path
 

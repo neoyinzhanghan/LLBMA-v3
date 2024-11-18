@@ -253,6 +253,7 @@ def predict_image(model, image):
     - confidence_score: The confidence score of the classification.
     """
     # Image preprocessing
+
     preprocess = transforms.Compose(
         [
             transforms.Resize(
