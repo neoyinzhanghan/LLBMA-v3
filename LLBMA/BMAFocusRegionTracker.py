@@ -89,9 +89,7 @@ class FocusRegionsTracker:
         """ """
 
         ray.shutdown()
-        print("Ray initialization for resnet confidence score")
         ray.init()
-        print("Ray initialization for resnet confidence score done")
 
         region_clf_managers = [
             RegionClfManager.remote(region_clf_ckpt_path)
@@ -170,8 +168,8 @@ class FocusRegionsTracker:
         self.info_df.loc[
             (self.info_df["idx"].isin(top_n_idx))
             & (self.info_df["adequate_confidence_score"] > 0),
-            "selected", 
-        ] = True # TODO TODO TODO remove this thresholding because we are going to do high mag region clf
+            "selected",
+        ] = True  # TODO TODO TODO remove this thresholding because we are going to do high mag region clf
 
         selected_idx = self.info_df[self.info_df["selected"]]["idx"]
         focus_regions = [self.focus_regions_dct[idx] for idx in selected_idx]
