@@ -502,11 +502,6 @@ class BMACounter:
             save_dir=self.save_dir,
         )
 
-        os.makedirs(
-            os.path.join(self.save_dir, "focus_regions", "high_mag_check"),
-            exist_ok=True,
-        )
-
         start_time = time.time()
         hoard_focus_regions_after_high_mag_scores_from_tracker(
             high_mag_check_tracker,
