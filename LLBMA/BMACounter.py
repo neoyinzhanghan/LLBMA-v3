@@ -380,7 +380,6 @@ class BMACounter:
         if self.verbose:
             print("Initializing WSICropManager")
 
-        num_focus_region_maker = 1
         task_managers = [
             WSIH5FocusRegionCreationManager.remote(self.h5_path)
             for _ in range(num_focus_region_maker)
@@ -518,16 +517,9 @@ class BMACounter:
 
         high_mag_check_tracker.save_results(self.save_dir)
 
-        self.profiling_data["high_mag_check_time"] = time.time() - start_time
+        high_mag_check_tracker.save_high_mag_score_plot()
 
-        if self.hoarding:
-            start_time = time.time()
-            high_mag_check_tracker.hoard_results(self.save_dir)
-            self.profiling_data["hoarding_high_mag_check_time"] = (
-                time.time() - start_time
-            )
-        else:
-            self.profiling_data["hoarding_high_mag_check_time"] = 0
+        self.profiling_data["high_mag_check_time"] = time.time() - start_time
 
     def find_wbc_candidates(self):
         """Update the wbc_candidates of the BMACounter object."""
