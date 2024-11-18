@@ -1,4 +1,5 @@
 import os
+import time
 from LLBMA.front_end.api import analyse_bma
 
 slide_path = (
@@ -21,6 +22,8 @@ if __name__ == "__main__":
         os.system(f"rm -rf {dump_dir}")
         os.makedirs(dump_dir)
 
+    start_time = time.time()
+
     # Run the heme_analyze function
     analyse_bma(
         slide_path=slide_path,
@@ -31,3 +34,5 @@ if __name__ == "__main__":
         check_specimen_clf=False,
         pretiled_h5_path=pretiled_h5_path,
     )
+
+    print(f"Time taken: {time.time() - start_time:.2f} seconds to process {slide_path}")

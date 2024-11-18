@@ -1,4 +1,6 @@
 import os
+import time
+import pandas as pd
 from tqdm import tqdm
 from LLBMA.front_end.api import analyse_bma
 
@@ -12,9 +14,16 @@ slide_paths = [
     if file.endswith(".ndpi")
 ]
 
+runtime_profile = {
+    "slide_path": [],
+    "runtime": [],
+}
+
 os.makedirs(dump_dir, exist_ok=True)
 
 for slide_path in tqdm(slide_paths, desc="Processing slides"):
+
+    start_time = time.time()
 
     pretiled_h5_path = os.path.join(
         h5_dir, os.path.basename(slide_path).replace(".ndpi", ".h5")
@@ -30,3 +39,13 @@ for slide_path in tqdm(slide_paths, desc="Processing slides"):
         check_specimen_clf=False,
         pretiled_h5_path=pretiled_h5_path,
     )
+
+    runtime_profile["slide_path"].append(slide_path)
+    runtime_profile["runtime"].append(time.time() - start_time)
+
+runtime_df = pd.DataFrame(runtime_profile)
+runtime_df.to_csv(os.path.join(dump_dir, "runtime_profile.csv"))
+
+print(f"Process completed for {len(slide_paths)} slides, results saved to {dump_dir}")
+print(f"Runtime data saved to {os.path.join(dump_dir, 'runtime_profile.csv')}")
+print(f"Average runtime: {runtime_df['runtime'].mean():.2f} seconds per slide")
