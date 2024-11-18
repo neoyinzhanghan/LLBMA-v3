@@ -29,5 +29,5 @@ if __name__ == "__main__":
         continue_on_error=True,
         do_extract_features=False,
         check_specimen_clf=False,
-        pretiled_h5_pathß=pretiled_h5_path,
+        pretiled_h5_path=pretiled_h5_path,
     )
