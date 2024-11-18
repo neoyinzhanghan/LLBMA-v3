@@ -7,6 +7,8 @@ def hoard_focus_regions_after_high_mag_scores(focus_regions, save_dir, num_sig_f
     Focus regions have an attributes called high_mag_score which is a float and an attribute called image.
     """
 
+    os.makedirs(save_dir, exist_ok=True)
+
     # for each focus region object we will save the image in the save_dir naming it as the int(high_mag_score * 10^num_sig_figs) with .jpeg extension
     for focus_region in tqdm(
         focus_regions, "Hoarding Focus Region Images Based on High Mag Scores"
