@@ -168,6 +168,30 @@ class YOLOManager:
 
         wbc_candidates = []
 
+        if self.num_detected >= self.max_num_wbc:
+
+            wbc_candidate_bboxes = []
+            df = pd.DataFrame(
+                columns=[
+                    "TL_x",
+                    "TL_y",
+                    "BR_x",
+                    "BR_y",
+                    "confidence",
+                    "focus_region_TL_x",
+                    "focus_region_TL_y",
+                    "local_idx",
+                    "focus_region_idx",
+                ]
+            )
+
+            focus_region.wbc_candidate_bboxes = wbc_candidate_bboxes
+            focus_region.wbc_candidates = wbc_candidates
+            focus_region.YOLO_df = df
+
+            # focus_region._save_YOLO_df(self.save_dir)
+            return focus_region
+
         df = YOLO_detect(self.model, focus_region.image, conf_thres=self.conf_thres)
 
         # add the coordinate of the focus region to the df

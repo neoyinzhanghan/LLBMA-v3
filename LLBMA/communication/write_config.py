@@ -18,6 +18,7 @@ def numpy_to_python(value):
     else:
         return value
 
+
 def save_selected_variables_to_yaml(variable_names, yaml_file):
     # Extract specified variables from the current scope
     variables = {name: globals()[name] for name in variable_names if name in globals()}
@@ -74,7 +75,8 @@ selected_variable_names = [
     "YOLO_ckpt_path",
     "YOLO_conf_thres",
     "HemeLabel_ckpt_path",
-    "specimen_clf_checkpoint_path"
-    "omitted_classes",
+    "specimen_clf_checkpoint_path" "omitted_classes",
     "removed_classes",
+    "high_mag_region_clf_ckpt_path",
+    "high_mag_region_clf_threshold",
 ]

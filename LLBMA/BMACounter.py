@@ -380,17 +380,17 @@ class BMACounter:
         if self.verbose:
             print("Initializing WSICropManager")
 
-        num_croppers = 1
+        num_focus_region_maker = 1
         task_managers = [
             WSIH5FocusRegionCreationManager.remote(self.h5_path)
-            for _ in range(num_croppers)
+            for _ in range(num_focus_region_maker)
         ]
 
         tasks = {}
         all_results = []
 
         for i, batch in enumerate(list_of_batches):
-            manager = task_managers[i % num_croppers]
+            manager = task_managers[i % num_focus_region_maker]
             task = manager.async_get_bma_focus_region_batch.remote(batch)
             tasks[task] = batch
 
@@ -500,6 +500,7 @@ class BMACounter:
 
         high_mag_check_tracker = BMAHighMagRegionCheckTracker(
             focus_regions=self.focus_regions,
+            save_dir=self.save_dir,
         )
 
         os.makedirs(
@@ -530,6 +531,12 @@ class BMACounter:
 
     def find_wbc_candidates(self):
         """Update the wbc_candidates of the BMACounter object."""
+
+        self.focus_regions = sorted(
+            self.focus_regions,
+            key=lambda x: x.adequate_confidence_score_high_mag,
+            reverse=True,
+        )
 
         start_time = time.time()
 

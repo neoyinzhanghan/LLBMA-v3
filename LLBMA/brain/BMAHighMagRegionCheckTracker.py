@@ -7,13 +7,14 @@ from LLBMA.brain.BMAHighMagRegionChecker import (
 from LLBMA.resources.BMAassumptions import (
     num_region_clf_managers,
     high_mag_region_clf_ckpt_path,
-    min_num_focus_regions,
+    # min_num_focus_regions,
     high_mag_region_clf_threshold,
-    max_num_focus_regions,
+    # max_num_focus_regions,
 )
 from LLBMA.brain.FocusRegionDataloader import (
     get_high_mag_focus_region_dataloader,
 )
+from LLBMA.communication.visualization import save_hist_KDE_rug_plot
 from tqdm import tqdm
 from ray.exceptions import RayTaskError
 
@@ -32,92 +33,14 @@ class BMAHighMagRegionCheckTracker:
     === Class Attributes ===
     - focus_regions: a list of focus regions that made it past the low magnification checks
     - info_df: a pandas DataFrame that stores the information of the focus regions
+    - save_dir: the directory where the results will be saved
 
     """
 
-    def __init__(self, focus_regions) -> None:
+    def __init__(self, focus_regions, save_dir) -> None:
         sorted_focus_regions = sort_focus_regions_based_on_low_mag_score(focus_regions)
 
-        # dataloader = get_high_mag_focus_region_dataloader(
-        #     sorted_focus_regions, wsi_path
-        # )
-
-        # high_mag_checkers = [
-        #     BMAHighMagRegionCheckerBatched.remote(
-        #         model_ckpt_path=high_mag_region_clf_ckpt_path,
-        #     )
-        #     for _ in range(num_region_clf_managers)
-        # ]
-
-        # tasks = {}
-        # new_focus_regions = []
-        # total_found = 0
-
-        # with tqdm(
-        #     total=len(focus_regions),
-        #     desc="Getting high magnification focus regions diagnostics...",
-        # ) as pbar_N:
-        #     with tqdm(
-        #         total=max_num_focus_regions,
-        #         desc="Getting high magnification focus regions diagnostics...",
-        #     ) as pbar_R:
-
-        #         # Iterate through the dataloader
-        #         data_iter = iter(dataloader)
-
-        #         try:
-        #             while True:
-        #                 # Stop sending batches if the total found regions exceed max_num_focus_regions
-        #                 if total_found >= max_num_focus_regions:
-        #                     break
-
-        #                 # Send a batch to each worker if possible
-        #                 for high_mag_checker in high_mag_checkers:
-        #                     try:
-        #                         batch = next(data_iter)  # Get the next batch
-        #                     except StopIteration:
-        #                         break  # Dataloader is exhausted
-
-        #                     # Assign batch to the worker
-        #                     tasks[high_mag_checker] = (
-        #                         high_mag_checker.async_check_high_mag_score.remote(
-        #                             batch
-        #                         )
-        #                     )
-
-        #                 # Process completed tasks
-        #                 while tasks:
-        #                     done, _ = ray.wait(list(tasks.values()), timeout=0.1)
-        #                     for done_task_id in done:
-        #                         try:
-        #                             # Retrieve results from Ray task
-        #                             focus_regions, num_found = ray.get(done_task_id)
-        #                             new_focus_regions.extend(focus_regions)
-        #                             total_found += num_found
-
-        #                             # Update progress bars
-        #                             pbar_R.update(num_found)
-        #                             pbar_N.update(len(focus_regions))
-
-        #                             # Stop further processing if max_num_focus_regions is reached
-        #                             if total_found >= max_num_focus_regions:
-        #                                 tasks.clear()  # Cancel remaining tasks
-        #                                 break
-        #                         except RayTaskError as e:
-        #                             print(e)
-        #                         finally:
-        #                             # Remove completed task from the dictionary
-        #                             del tasks[done_task_id]
-
-        #                     if total_found >= max_num_focus_regions:
-        #                         break
-
-        #         except Exception as e:
-        #             print(f"Error occurred: {e}")
-
-        # ray.shutdown()
-
-        # self.focus_regions = new_focus_regions
+        self.save_dir = save_dir
 
         dataloader = get_high_mag_focus_region_dataloader(sorted_focus_regions)
 
@@ -236,23 +159,19 @@ class BMAHighMagRegionCheckTracker:
         # save the df in the save_dir/focus_regions/high_mag_focus_regions_info.csv
         self.info_df.to_csv(f"{save_dir}/focus_regions/high_mag_focus_regions_info.csv")
 
-    def hoard_results(self, save_dir):
-        # os.makedirs(f"{save_dir}/focus_regions/high_mag_rejected", exist_ok=True)
+    def save_high_mag_score_plot(self):
 
-        # good_focus_regions = self.get_good_focus_regions()
-        # bad_focus_regions = [
-        #     focus_region
-        #     for focus_region in self.focus_regions
-        #     if focus_region not in good_focus_regions
-        # ]
+        plot_save_path = os.path.join(
+            self.save_dir, "focus_regions", "high_mag_score_plot.png"
+        )
 
-        # for focus_region in tqdm(
-        #     bad_focus_regions, desc="Saving rejected focus regions..."
-        # ):
-        #     focus_region.image.save(
-        #         f"{save_dir}/focus_regions/high_mag_rejected/{focus_region.idx}.jpg"
-        #     )
-        pass  # TODO TODO TODO DEPRECATED we no longer hoard high mag rejected regions after the implementation of dynamic region filtering
+        save_hist_KDE_rug_plot(
+            self.info_df,
+            column_name="adequate_confidence_score_high_mag",
+            save_path=plot_save_path,
+            title="High Magnification Confidence Score Distribution",
+            lines=[high_mag_region_clf_threshold],
+        )
 
 
 class HighMagCheckFailedError(Exception):

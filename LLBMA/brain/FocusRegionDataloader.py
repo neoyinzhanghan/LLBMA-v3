@@ -1,12 +1,7 @@
 import torch
 import openslide
 from PIL import Image
-from LLBMA.resources.BMAassumptions import (
-    snap_shot_size,
-    region_clf_batch_size,
-    num_croppers,
-    num_region_clf_managers,
-)
+from LLBMA.resources.BMAassumptions import high_mag_region_clf_batch_size, num_croppers
 from torchvision import transforms
 
 
@@ -75,7 +70,7 @@ def custom_collate_function(batch):
 
 
 def get_high_mag_focus_region_dataloader(
-    focus_regions, batch_size=region_clf_batch_size, num_workers=num_croppers
+    focus_regions, batch_size=high_mag_region_clf_batch_size, num_workers=num_croppers
 ):
     """Return a dataloader of high magnification focus regions."""
     high_mag_focus_region_dataset = HighMagFocusRegionDataset(focus_regions)

@@ -64,6 +64,7 @@ max_num_focus_regions = 200
 num_gpus = 2
 num_cpus = 64
 num_croppers = 32
+num_focus_region_maker = 32
 num_YOLOManagers = 2
 max_num_wbc_per_manager = max_num_cells // num_YOLOManagers
 num_labellers = 2
@@ -77,6 +78,7 @@ allowed_reading_time = 60  # in seconds
 region_cropping_batch_size = 512
 region_saving_batch_size = 512
 region_clf_batch_size = 32
+high_mag_region_clf_batch_size = 20
 cell_clf_batch_size = 256
 YOLO_batch_size = 32
 
@@ -91,7 +93,7 @@ region_clf_ckpt_path = "/media/hdd3/neo/MODELS/2024-11-07_BMARegionClf-20K/8/ver
 # region_clf_ckpt_path = "/media/ssd1/neo/LLCKPTS/epoch=99-step=10300.ckpt" # This one is for alpaca
 # region_clf_ckpt_path = "/media/hdd2/neo/LLCKPTS/epoch=99-step=10300.ckpt" # This one is for bear
 # We do not need a confidence threshold because we take the top regions from the region classifier
-region_clf_conf_thres = 0.85
+region_clf_conf_thres = 0
 
 YOLO_ckpt_path = (
     "/media/hdd3/neo/MODELS/2024-03-13 YOLO BMA/runs/detect/train/weights/best.pt"
@@ -114,7 +116,7 @@ supported_feature_extraction_archs = feature_extractor_ckpt_dict.keys()
 # high_mag_region_clf_ckpt_path = "/media/hdd3/neo/MODELS/2024-04-24 BMARegionClf High Mag w Aug/1/version_0/checkpoints/epoch=199-step=11000.ckpt" # TODO REMOVE this is the old path
 # high_mag_region_clf_ckpt_path = "/media/hdd3/neo/MODELS/2024-11-11_BMARegionClf-20K-balanced/1/version_0/checkpoints/epoch=74-step=15075.ckpt"
 high_mag_region_clf_ckpt_path = "/media/hdd3/neo/MODELS/2024-11-07_BMARegionClf-20K/1/version_0/checkpoints/epoch=64-step=21515.ckpt"
-high_mag_region_clf_threshold = 0.75
+high_mag_region_clf_threshold = 0.5
 
 ###########################
 ### Augmentation Config ###
