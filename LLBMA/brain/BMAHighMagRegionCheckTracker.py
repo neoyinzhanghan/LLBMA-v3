@@ -44,6 +44,9 @@ class BMAHighMagRegionCheckTracker:
 
         dataloader = get_high_mag_focus_region_dataloader(sorted_focus_regions)
 
+        ray.shutdown()
+        ray.init(ignore_reinit_error=True)
+
         high_mag_checkers = [
             BMAHighMagRegionCheckerBatched.remote(
                 model_ckpt_path=high_mag_region_clf_ckpt_path,
