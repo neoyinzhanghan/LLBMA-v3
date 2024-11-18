@@ -2,10 +2,10 @@ import os
 from LLBMA.front_end.api import analyse_bma
 
 slide_path = (
-    "/media/hdd3/neo/error_slides_ndpi/H24-3456;S20;MSK9 - 2024-05-20 12.14.45.ndpi"
+    "/media/hdd3/neo/error_slides_ndpi/H18-1938;S10;MSKD - 2023-12-12 03.41.46.ndpi"
 )
 pretiled_h5_path = (
-    "/media/hdd3/neo/error_slides_h5/H24-3456;S20;MSK9 - 2024-05-20 12.14.45.h5"
+    "/media/hdd3/neo/error_slides_h5/H18-1938;S10;MSKD - 2023-12-12 03.41.46.h5"
 )
 dump_dir = "/media/hdd3/neo/test_error_results_dir"
 
