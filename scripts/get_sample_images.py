@@ -68,6 +68,9 @@ for subdir in tqdm(subdirs, desc="Processing Result Dirs"):
         score = int(name_no_ext)
         if random.random() > 0.05 and score < 500000:
             continue
+        elif random.random() > 0.50 and score >= 500000:
+            continue
+
         if score >= 500000:
             if is_ERROR:
                 save_dir = os.path.join(ERROR_save_dir, "above_050_regions")
