@@ -92,5 +92,7 @@ for subdir in tqdm(subdirs, desc="Processing Result Dirs"):
         else:
             shutil.copy(
                 os.path.join(subdir, "top_view_grid_rep.png"),
-                os.path.join(non_ERROR_save_dir, "non_ERROR_grid_rep", f"{img_idx}.png"),
+                os.path.join(
+                    non_ERROR_save_dir, "non_ERROR_grid_rep", f"{img_idx}.png"
+                ),
             )
