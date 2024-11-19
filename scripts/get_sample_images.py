@@ -1,5 +1,6 @@
 import os
 import shutil
+import random
 from tqdm import tqdm
 
 result_dir = "/media/hdd3/neo/test_error_results_dir_050"
@@ -53,7 +54,11 @@ for subdir in tqdm(subdirs, desc="Processing Result Dirs"):
     else:
         is_ERROR = True
 
-    for jpeg_path in tqdm(jpeg_paths, desc="Coping JPEGs"):
+    for jpeg_path in tqdm(jpeg_paths, desc="Processing JPEGs"):
+        # Apply the 5% probability for copying
+        if random.random() > 0.05:
+            continue
+
         jpeg_name = os.path.basename(jpeg_path)
         name_no_ext = os.path.splitext(jpeg_name)[0]
 
@@ -63,7 +68,6 @@ for subdir in tqdm(subdirs, desc="Processing Result Dirs"):
                 save_dir = os.path.join(ERROR_save_dir, "above_050_regions")
             else:
                 save_dir = os.path.join(non_ERROR_save_dir, "above_050_regions")
-
         else:
             if is_ERROR:
                 save_dir = os.path.join(ERROR_save_dir, "below_050_regions")
@@ -73,14 +77,15 @@ for subdir in tqdm(subdirs, desc="Processing Result Dirs"):
         shutil.copy(jpeg_path, os.path.join(save_dir, jpeg_name))
         img_idx += 1
 
-    # copy the subdir/top_view_grid_rep.png file to the appropriate directory
-    if is_ERROR:
-        shutil.copy(
-            os.path.join(subdir, "top_view_grid_rep.png"),
-            os.path.join(ERROR_save_dir, "ERROR_grid_rep", f"{img_idx}.png"),
-        )
-    else:
-        shutil.copy(
-            os.path.join(subdir, "top_view_grid_rep.png"),
-            os.path.join(non_ERROR_save_dir, "non_ERROR_grid_rep", f"{img_idx}.png"),
-        )
+    # Apply 5% probability for copying the grid representation
+    if random.random() <= 0.05:
+        if is_ERROR:
+            shutil.copy(
+                os.path.join(subdir, "top_view_grid_rep.png"),
+                os.path.join(ERROR_save_dir, "ERROR_grid_rep", f"{img_idx}.png"),
+            )
+        else:
+            shutil.copy(
+                os.path.join(subdir, "top_view_grid_rep.png"),
+                os.path.join(non_ERROR_save_dir, "non_ERROR_grid_rep", f"{img_idx}.png"),
+            )
