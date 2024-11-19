@@ -17,6 +17,8 @@ os.makedirs(os.path.join(non_ERROR_save_dir, "below_050_regions"), exist_ok=True
 
 os.makedirs(os.path.join(ERROR_save_dir, "ERROR_grid_rep"), exist_ok=True)
 os.makedirs(os.path.join(ERROR_save_dir, "non_ERROR_grid_rep"), exist_ok=True)
+os.makedirs(os.path.join(non_ERROR_save_dir, "ERROR_grid_rep"), exist_ok=True)
+os.makedirs(os.path.join(non_ERROR_save_dir, "non_ERROR_grid_rep"), exist_ok=True)
 
 # get the list of subdirectories in the result directory
 subdirs = [
