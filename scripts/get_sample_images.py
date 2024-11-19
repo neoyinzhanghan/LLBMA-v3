@@ -28,13 +28,13 @@ img_idx = 0
 
 for subdir in tqdm(subdirs, desc="Processing Result Dirs"):
     # first get the list of all .jpeg files in the subdir/focus_region_debug_hoarding folder
-    focus_region_debug_hoarding_dir = os.path.join(
-        subdir, "focus_region_debug_hoarding"
+    focus_regions_debug_hoarding_dir = os.path.join(
+        subdir, "focus_regions_debug_hoarding"
     )
 
     jpeg_paths = [
-        os.path.join(focus_region_debug_hoarding_dir, file)
-        for file in os.listdir(focus_region_debug_hoarding_dir)
+        os.path.join(focus_regions_debug_hoarding_dir, file)
+        for file in os.listdir(focus_regions_debug_hoarding_dir)
         if file.endswith(".jpeg")
     ]
 
