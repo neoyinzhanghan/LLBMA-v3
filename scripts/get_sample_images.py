@@ -61,13 +61,13 @@ for subdir in tqdm(subdirs, desc="Processing Result Dirs"):
 
     for jpeg_path in tqdm(jpeg_paths, desc="Processing JPEGs"):
         # Apply the 5% probability for copying
-        if random.random() > 0.05:
-            continue
 
         jpeg_name = os.path.basename(jpeg_path)
         name_no_ext = os.path.splitext(jpeg_name)[0]
 
         score = int(name_no_ext)
+        if random.random() > 0.05 and score < 500000:
+            continue
         if score >= 500000:
             if is_ERROR:
                 save_dir = os.path.join(ERROR_save_dir, "above_050_regions")
@@ -82,17 +82,13 @@ for subdir in tqdm(subdirs, desc="Processing Result Dirs"):
         shutil.copy(jpeg_path, os.path.join(save_dir, jpeg_name))
         img_idx += 1
 
-    # Apply 5% probability for copying the grid representation
-    if random.random() <= 0.05:
-        if is_ERROR:
-            shutil.copy(
-                os.path.join(subdir, "top_view_grid_rep.png"),
-                os.path.join(ERROR_save_dir, "ERROR_grid_rep", f"{img_idx}.png"),
-            )
-        else:
-            shutil.copy(
-                os.path.join(subdir, "top_view_grid_rep.png"),
-                os.path.join(
-                    non_ERROR_save_dir, "non_ERROR_grid_rep", f"{img_idx}.png"
-                ),
-            )
+    if is_ERROR:
+        shutil.copy(
+            os.path.join(subdir, "top_view_grid_rep.png"),
+            os.path.join(ERROR_save_dir, "ERROR_grid_rep", f"{img_idx}.png"),
+        )
+    else:
+        shutil.copy(
+            os.path.join(subdir, "top_view_grid_rep.png"),
+            os.path.join(non_ERROR_save_dir, "non_ERROR_grid_rep", f"{img_idx}.png"),
+        )
