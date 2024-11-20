@@ -17,7 +17,10 @@ def hoard_focus_regions_after_high_mag_scores(focus_regions, save_dir, num_sig_f
         high_mag_score = focus_region.adequate_confidence_score_high_mag
 
         image.save(
-            os.path.join(save_dir, f"{int(high_mag_score * 10**num_sig_figs)}.jpeg"),
+            os.path.join(
+                save_dir,
+                f"{int(high_mag_score * 10**num_sig_figs)}_{focus_region.idx}.jpeg",
+            ),
             "JPEG",
         )
 

@@ -7,7 +7,7 @@ from LLBMA.front_end.api import analyse_bma
 
 slides_dir = "/media/hdd3/neo/error_slides_ndpi"
 h5_dir = "/media/hdd3/neo/error_slides_h5"
-dump_dir = "/media/hdd3/neo/test_error_results_dir_050"
+dump_dir = "/media/hdd3/neo/test_error_results_dir_025"
 
 slide_paths = [
     os.path.join(slides_dir, file)
@@ -34,25 +34,22 @@ for slide_path in tqdm(slide_paths, desc="Processing slides"):
     # remove the .ndpi extension
     slide_name = os.path.splitext(slide_name)[0]
 
-    if slide_name in subdirs:
-        print(f"Skipping {slide_name} as it has already been processed")
-        import sys
+    # if slide_name in subdirs:
+    #     print(f"Skipping {slide_name} as it has already been processed")
+    #     continue
 
-        sys.exit(0)
-        continue
+    # if os.path.exists(dump_dir, slide_name) and not os.path.exists(
+    #     dump_dir, slide_name, "focus_regions_debug_hoarding"
+    # ):
+    #     # deliete the directory
+    #     shutil.rmtree(os.path.join(dump_dir, slide_name))
 
-    if os.path.exists(dump_dir, slide_name) and not os.path.exists(
-        dump_dir, slide_name, "focus_regions_debug_hoarding"
-    ):
-        # deliete the directory
-        shutil.rmtree(os.path.join(dump_dir, slide_name))
-
-    error_slide_name = "ERROR_" + slide_name
-    if os.path.exists(dump_dir, error_slide_name) and not os.path.exists(
-        dump_dir, error_slide_name, "focus_regions_debug_hoarding"
-    ):
-        # deliete the directory
-        shutil.rmtree(os.path.join(dump_dir, error_slide_name))
+    # error_slide_name = "ERROR_" + slide_name
+    # if os.path.exists(dump_dir, error_slide_name) and not os.path.exists(
+    #     dump_dir, error_slide_name, "focus_regions_debug_hoarding"
+    # ):
+    #     # deliete the directory
+    #     shutil.rmtree(os.path.join(dump_dir, error_slide_name))
 
     start_time = time.time()
 

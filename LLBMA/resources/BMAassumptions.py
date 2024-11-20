@@ -116,7 +116,7 @@ supported_feature_extraction_archs = feature_extractor_ckpt_dict.keys()
 # high_mag_region_clf_ckpt_path = "/media/hdd3/neo/MODELS/2024-04-24 BMARegionClf High Mag w Aug/1/version_0/checkpoints/epoch=199-step=11000.ckpt" # TODO REMOVE this is the old path
 # high_mag_region_clf_ckpt_path = "/media/hdd3/neo/MODELS/2024-11-11_BMARegionClf-20K-balanced/1/version_0/checkpoints/epoch=74-step=15075.ckpt"
 high_mag_region_clf_ckpt_path = "/media/hdd3/neo/MODELS/2024-11-07_BMARegionClf-20K/1/version_0/checkpoints/epoch=64-step=21515.ckpt"
-high_mag_region_clf_threshold = 0.5
+high_mag_region_clf_threshold = 0.25
 
 ###########################
 ### Augmentation Config ###
