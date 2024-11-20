@@ -9,6 +9,8 @@ slides_dir = "/media/hdd3/neo/error_slides_ndpi"
 h5_dir = "/media/hdd3/neo/error_slides_h5"
 dump_dir = "/media/hdd3/neo/test_error_results_dir_025"
 
+os.makedirs(dump_dir, exist_ok=True)  
+
 slide_paths = [
     os.path.join(slides_dir, file)
     for file in os.listdir(slides_dir)
