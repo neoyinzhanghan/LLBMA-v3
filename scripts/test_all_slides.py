@@ -1,5 +1,6 @@
 import os
 import time
+import shutil
 import pandas as pd
 from tqdm import tqdm
 from LLBMA.front_end.api import analyse_bma
@@ -14,6 +15,12 @@ slide_paths = [
     if file.endswith(".ndpi")
 ]
 
+subdirs = [
+    subdir
+    for subdir in os.listdir(dump_dir)
+    if os.path.isdir(os.path.join(dump_dir, subdir))
+]
+
 runtime_profile = {
     "slide_path": [],
     "runtime": [],
@@ -22,6 +29,30 @@ runtime_profile = {
 os.makedirs(dump_dir, exist_ok=True)
 
 for slide_path in tqdm(slide_paths, desc="Processing slides"):
+
+    slide_name = os.path.basename(slide_path)
+    # remove the .ndpi extension
+    slide_name = os.path.splitext(slide_name)[0]
+
+    if slide_name in subdirs:
+        print(f"Skipping {slide_name} as it has already been processed")
+        import sys
+
+        sys.exit(0)
+        continue
+
+    if os.path.exists(dump_dir, slide_name) and not os.path.exists(
+        dump_dir, slide_name, "focus_regions_debug_hoarding"
+    ):
+        # deliete the directory
+        shutil.rmtree(os.path.join(dump_dir, slide_name))
+
+    error_slide_name = "ERROR_" + slide_name
+    if os.path.exists(dump_dir, error_slide_name) and not os.path.exists(
+        dump_dir, error_slide_name, "focus_regions_debug_hoarding"
+    ):
+        # deliete the directory
+        shutil.rmtree(os.path.join(dump_dir, error_slide_name))
 
     start_time = time.time()
 
