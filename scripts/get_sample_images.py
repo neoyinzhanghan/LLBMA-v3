@@ -35,8 +35,8 @@ for subdir in tqdm(subdirs, desc="Processing Result Dirs"):
         subdir, "focus_regions_debug_hoarding"
     )
 
-    if not os.path.exists(focus_regions_debug_hoarding_dir):
-        continue
+    # if not os.path.exists(focus_regions_debug_hoarding_dir):
+    #     continue
 
     jpeg_paths = [
         os.path.join(focus_regions_debug_hoarding_dir, file)
