@@ -1,7 +1,7 @@
 import time
 from LLBMA.tiling.dzsave_h5 import dzsave_h5
 
-slide_path = "/media/hdd3/neo/error/viewer_test_slide.ndpi"
+slide_path = "/media/hdd3/neo/viewer_test_slide.ndpi"
 h5_path_256 = "/media/hdd3/neo/viewer_test_slide_256.h5"
 h5_path_512 = "/media/hdd3/neo/viewer_test_slide_512.h5"
 
