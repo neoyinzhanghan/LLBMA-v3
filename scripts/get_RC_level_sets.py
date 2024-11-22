@@ -1,5 +1,4 @@
 import os
-import shutil
 from tqdm import tqdm
 
 result_dir = "/media/hdd3/neo/test_error_results_dir_025"
@@ -29,6 +28,10 @@ levels = [
 ]
 
 stride = 50000
+
+# if the save_dir already exists, delete it
+if os.path.exists(save_dir):
+    os.system(f"rm -rf {save_dir}")
 
 os.makedirs(save_dir, exist_ok=True)
 for level in levels:
@@ -80,4 +83,6 @@ for subdir in tqdm(subdirs, desc="Gathering jpegs from Result Dirs"):
 for jpeg_path in tqdm(jpeg_paths, desc="Processing JPEGs"):
     level = find_level(jpeg_path)
     level_dir = os.path.join(save_dir, str(level))
-    shutil.copy(jpeg_path, level_dir)
+
+    # create a symlink to the jpeg in the appropriate level directory
+    os.symlink(jpeg_path, os.path.join(level_dir, os.path.basename(jpeg_path)))
