@@ -6,6 +6,7 @@ save_dir = "/media/hdd3/neo/RC_level_sets"
 
 levels = [
     0,
+    5000,
     100000,
     150000,
     200000,
@@ -44,7 +45,7 @@ def find_level(jpeg_path):
 
     score = int(name_no_ext.split("_")[0])  # get the score from the jpeg name
     for i in range(len(levels)):
-        if i == 0:
+        if i == 0 or i == 1:
             continue
         elif score < levels[i]:
             return levels[i - 1]
