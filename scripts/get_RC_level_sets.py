@@ -42,7 +42,7 @@ def find_level(jpeg_path):
     jpeg_name = os.path.basename(jpeg_path)
     name_no_ext = os.path.splitext(jpeg_name)[0]
 
-    score = int(name_no_ext.split("_")[0]) # get the score from the jpeg name
+    score = int(name_no_ext.split("_")[0])  # get the score from the jpeg name
     for i in range(len(levels)):
         if i == 0:
             continue
@@ -85,10 +85,16 @@ for subdir in tqdm(subdirs, desc="Gathering jpegs from Result Dirs"):
         ]
     )
 
+pseudo_idx = 0
 
 for jpeg_path in tqdm(jpeg_paths, desc="Processing JPEGs"):
     level = find_level(jpeg_path)
     level_dir = os.path.join(save_dir, str(level))
 
+    new_name = f"{pseudo_idx}.jpeg"
+    new_path = os.path.join(level_dir, new_name)
+
     # create a symlink to the jpeg in the appropriate level directory
-    os.symlink(jpeg_path, os.path.join(level_dir, os.path.basename(jpeg_path)))
+    os.symlink(jpeg_path, new_path)
+
+    pseudo_idx += 1
