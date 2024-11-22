@@ -39,7 +39,7 @@ for subdir in tqdm(subdirs, desc="Gathering jpegs from Result Dirs"):
         name_no_ext = os.path.splitext(jpeg_name)[0]
 
         score = int(name_no_ext)
-        if score >= 500000:
+        if score >= 200000:
             num_good += 1
 
     if num_good >= 20:
