@@ -2,7 +2,7 @@ import os
 from tqdm import tqdm
 
 result_dir = "/media/hdd3/neo/test_error_results_dir_025"
-save_dir = "/media/hdd3/neo/RC_level_sets_H18-5942;S1;MSK3 - 2023-12-12 00.04.42"
+save_dir = "/media/hdd3/neo/RC_level_sets_H17-4780;S10;MSKK - 2023-09-11 09.17.56"
 
 levels = [
     0,
@@ -74,7 +74,7 @@ jpeg_paths = []
 # get the list of all .jpeg files in the subdir/focus_region_debug_hoarding folders
 for subdir in tqdm(subdirs, desc="Gathering jpegs from Result Dirs"):
 
-    if "H18-5942;S1;MSK3 - 2023-12-12 00.04.42" not in subdir:
+    if "H17-4780;S10;MSKK - 2023-09-11 09.17.56" not in subdir:
         continue
 
     focus_regions_debug_hoarding_dir = os.path.join(
