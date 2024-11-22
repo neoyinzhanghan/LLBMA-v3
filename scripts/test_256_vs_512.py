@@ -18,7 +18,7 @@ print("Saving 512x512 tiles")
 start_time = time.time()
 dzsave_h5(
     slide_path,
-    h5_path_256,
+    h5_path_512,
     tile_size=512,
 )
 time_512 = time.time() - start_time

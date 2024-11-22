@@ -1,6 +1,8 @@
 import os
 import ray
+import cv2
 import pandas as pd
+import numpy as np
 from LLBMA.brain.BMAHighMagRegionChecker import (
     BMAHighMagRegionCheckerBatched,
 )
@@ -10,12 +12,14 @@ from LLBMA.resources.BMAassumptions import (
     # min_num_focus_regions,
     high_mag_region_clf_threshold,
     # max_num_focus_regions,
+    topview_downsampling_factor,
 )
 from LLBMA.brain.FocusRegionDataloader import (
     get_high_mag_focus_region_dataloader,
 )
 from LLBMA.communication.visualization import save_hist_KDE_rug_plot
 from tqdm import tqdm
+from PIL import Image
 from ray.exceptions import RayTaskError
 
 
@@ -175,6 +179,47 @@ class BMAHighMagRegionCheckTracker:
             title="High Magnification Confidence Score Distribution",
             lines=[high_mag_region_clf_threshold],
         )
+
+    def save_confidence_heatmap(self, topview_img_pil, save_dir):
+        # Convert the PIL image to OpenCV format (BGR)
+        topview_img_cv = cv2.cvtColor(np.array(topview_img_pil), cv2.COLOR_RGB2BGR)
+
+        # Create a blank image (heatmap) with the same dimensions as topview_img, but with 3 channels for RGB colors
+        heatmap = np.zeros((*topview_img_cv.shape[:2], 3), dtype=np.uint8)
+
+        # Iterate through the patches
+        for index, row in self.info_df.iterrows():
+            # Extract the bounding box and confidence score
+            TL_x, TL_y, BR_x, BR_y = row["coordinate"]
+            confidence_score = row["adequate_confidence_score"]
+
+            # Adjust the coordinates for the downsampling factor
+            TL_x_adj = int(TL_x / topview_downsampling_factor)
+            TL_y_adj = int(TL_y / topview_downsampling_factor)
+            BR_x_adj = int(BR_x / topview_downsampling_factor)
+            BR_y_adj = int(BR_y / topview_downsampling_factor)
+
+            # Calculate color based on confidence_score, red for 0, green for 1
+            red_intensity = (1 - confidence_score) * 255
+            green_intensity = confidence_score * 255
+            color = [0, green_intensity, red_intensity]  # BGR format for OpenCV
+
+            # Assign the color to the corresponding region in the heatmap
+            heatmap[TL_y_adj:BR_y_adj, TL_x_adj:BR_x_adj] = color
+
+        # Since the heatmap is already in BGR format, we don't need to apply a colormap
+        heatmap_colored = heatmap
+
+        # Overlay the heatmap on the original topview image
+        overlay_img_cv = cv2.addWeighted(topview_img_cv, 0.7, heatmap_colored, 0.3, 0)
+
+        # Convert back to PIL image in RGB format
+        overlay_img_pil = Image.fromarray(
+            cv2.cvtColor(overlay_img_cv, cv2.COLOR_BGR2RGB)
+        )
+
+        # save the overlay_img_pil in save_dir
+        overlay_img_pil.save(os.path.join(save_dir, "confidence_heatmap.png"))
 
 
 class HighMagCheckFailedError(Exception):
