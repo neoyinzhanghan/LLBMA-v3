@@ -6,7 +6,7 @@ save_dir = "/media/hdd3/neo/RC_level_sets_new"
 
 levels = [
     0,
-    5000,
+    50000,
     100000,
     150000,
     200000,
