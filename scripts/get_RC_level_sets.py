@@ -48,6 +48,10 @@ def find_level(jpeg_path):
             continue
         elif score < levels[i]:
             return levels[i - 1]
+    
+    print(f"Score {score} is greater than 1000000")
+    import sys
+    sys.exit(1)
 
 
 # first get the list of all subdirs in the result directory
