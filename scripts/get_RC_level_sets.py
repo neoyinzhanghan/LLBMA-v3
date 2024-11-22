@@ -50,6 +50,7 @@ def find_level(jpeg_path):
             return levels[i - 1]
     
     print(f"Score {score} is greater than 1000000")
+    print(f"JPEG file at {jpeg_path} is faulty")
     import sys
     sys.exit(1)
 
