@@ -42,16 +42,17 @@ def find_level(jpeg_path):
     jpeg_name = os.path.basename(jpeg_path)
     name_no_ext = os.path.splitext(jpeg_name)[0]
 
-    score = int(name_no_ext)
+    score = int(name_no_ext.split("_")[0]) # get the score from the jpeg name
     for i in range(len(levels)):
         if i == 0:
             continue
         elif score < levels[i]:
             return levels[i - 1]
-    
+
     print(f"Score {score} is greater than 1000000")
     print(f"JPEG file at {jpeg_path} is faulty")
     import sys
+
     sys.exit(1)
 
 
