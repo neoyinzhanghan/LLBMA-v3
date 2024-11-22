@@ -2,7 +2,7 @@ import os
 from tqdm import tqdm
 
 result_dir = "/media/hdd3/neo/test_error_results_dir_025"
-save_dir = "/media/hdd3/neo/RC_level_sets"
+save_dir = "/media/hdd3/neo/RC_level_sets_new"
 
 levels = [
     0,
