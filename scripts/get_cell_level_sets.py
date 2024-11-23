@@ -61,6 +61,8 @@ def find_levels(score, levels=all_levels):
 
     print(f"Score {score} is greater than 1.0")
     print(f"Score {score} is faulty")
+    return levels[0]
+
 
 for cell_type in cellnames:
     for level_str in levels_str:
