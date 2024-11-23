@@ -44,7 +44,7 @@ print(levels_str)
 print(all_levels)
 print(all_level_str)
 
-def find_levels(score: float, levels=all_levels):
+def find_levels(score, levels=all_levels):
     for i in range(len(levels)):
         if i == 0:
             continue
@@ -56,7 +56,7 @@ def find_levels(score: float, levels=all_levels):
     print(f"Score {score} is faulty")
     import sys
 
-    sys.exit(1)
+    sys.exit()
 
 
 for cell_type in cellnames:
