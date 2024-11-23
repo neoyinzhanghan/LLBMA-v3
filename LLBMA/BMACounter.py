@@ -519,9 +519,13 @@ class BMACounter:
 
         high_mag_check_tracker.save_high_mag_score_plot()
 
-        high_mag_check_tracker.save_confidence_heatmap()
+        high_mag_check_tracker.save_confidence_heatmap(
+            self.top_view.image, self.save_dir
+        )
 
-        high_mag_check_tracker.save_selected_focus_region_locations()
+        high_mag_check_tracker.save_selected_focus_region_locations(
+            self.top_view.image, self.save_dir
+        )
 
         self.profiling_data["high_mag_check_time"] = time.time() - start_time
 
