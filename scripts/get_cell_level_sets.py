@@ -1,5 +1,6 @@
 import os
 import random
+import shutil
 import pandas as pd
 from tqdm import tqdm
 import matplotlib.pyplot as plt
@@ -120,7 +121,7 @@ for subdir in tqdm(subdirs, desc="Processing Result Dirs"):
             new_path = os.path.join(save_dir, cell_type, level_str, new_name)
 
             # create a symlink to the jpg in the appropriate level directory
-            os.symlink(jpg, new_path)
+            shutil.copy(jpg, new_path)
             pseudo_idx += 1
 
 for cell_type in cellnames:
