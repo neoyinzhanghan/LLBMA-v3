@@ -5,8 +5,11 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 from LLBMA.resources.BMAassumptions import *
 
-result_dir = "/media/hdd3/neo/test_error_results_dir_025"
 save_dir = "/media/hdd3/neo/CC_level_sets"
+dump_dir = "/media/greg/534773e3-83ea-468f-a40d-46c913378014/neo/results_dir"
+result_df_tracker = (
+    "/home/greg/Documents/neo/LL-Eval/pipeline_nonerror_aggregate_df.csv"
+)
 
 # if save_dir already exists, delete it
 if os.path.exists(save_dir):
@@ -67,11 +70,13 @@ for cell_type in cellnames:
         os.makedirs(os.path.join(save_dir, cell_type, level_str), exist_ok=True)
 
 # get all the paths in the result directory
-subdirs = [
-    os.path.join(result_dir, subdir)
-    for subdir in os.listdir(result_dir)
-    if os.path.isdir(os.path.join(result_dir, subdir))
-]
+# open the result_df_tracker
+result_df = pd.read_csv(result_df_tracker)
+
+# get the result_dir_name column as a list of strings
+result_dirs = result_df["result_dir_name"].tolist()
+
+subdirs = [os.path.join(dump_dir, subdir) for subdir in result_dirs]
 
 # only keep the ones that do not start with ERROR
 subdirs = [
