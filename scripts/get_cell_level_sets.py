@@ -39,6 +39,10 @@ def get_levels():
 levels, levels_str = get_levels()
 all_levels, all_level_str = get_levels()
 
+print(levels)
+print(levels_str)
+print(all_levels)
+print(all_level_str)
 
 def find_levels(score: float, levels=all_levels):
     for i in range(len(levels)):
