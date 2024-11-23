@@ -223,7 +223,7 @@ class BMAHighMagRegionCheckTracker:
         # save the overlay_img_pil in save_dir
         overlay_img_pil.save(os.path.join(save_dir, "confidence_heatmap_high_mag.png"))
 
-    def save_selected_focus_region_location(self, topview_img_pil, save_dir):
+    def save_selected_focus_region_locations(self, topview_img_pil, save_dir):
         # Convert the PIL image to OpenCV format (BGR)
         topview_img_cv = cv2.cvtColor(np.array(topview_img_pil), cv2.COLOR_RGB2BGR)
 

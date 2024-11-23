@@ -139,6 +139,7 @@ class BMACounter:
 
             if self.verbose:
                 print(f"Processing WSI top view as TopView object")
+
             # Processing the top level image
             top_level = topview_level
 
@@ -517,6 +518,10 @@ class BMACounter:
         high_mag_check_tracker.save_results(self.save_dir)
 
         high_mag_check_tracker.save_high_mag_score_plot()
+
+        high_mag_check_tracker.save_confidence_heatmap()
+
+        high_mag_check_tracker.save_selected_focus_region_locations()
 
         self.profiling_data["high_mag_check_time"] = time.time() - start_time
 
