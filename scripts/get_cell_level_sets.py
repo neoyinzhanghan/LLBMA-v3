@@ -43,7 +43,7 @@ def find_levels(score: float):
     for i in range(len(levels)):
         if i == 0:
             continue
-        elif score < levels[i]:
+        elif score <= levels[i]:
             return levels[i - 1]
 
     print(f"Score {score} is greater than 1.0")
