@@ -8,5 +8,7 @@ df = sst.df
 # get the "Accession Number" column of df as a list of strings
 case_numbers = df["Accession Number"].tolist()
 
+diff_data = get_diff(case_numbers)
 
-print(case_numbers)
+print(diff_data)
+print(type(diff_data))
