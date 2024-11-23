@@ -92,7 +92,7 @@ for subdir in tqdm(subdirs, desc="Processing Result Dirs"):
     # randomly select num_per_subdir jpgs
     jpgs = random.sample(jpgs, num_per_subdir)
 
-    cell_df_path = os.path.join(subdir, "cells", "cell_info.csv")
+    cell_df_path = os.path.join(subdir, "cells", "cells_info.csv")
 
     cell_df = pd.read_csv(cell_df_path)
 
