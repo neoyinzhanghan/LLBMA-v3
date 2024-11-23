@@ -221,7 +221,7 @@ class BMAHighMagRegionCheckTracker:
         )
 
         # save the overlay_img_pil in save_dir
-        overlay_img_pil.save(os.path.join(save_dir, "confidence_heatmap.png"))
+        overlay_img_pil.save(os.path.join(save_dir, "confidence_heatmap_high_mag.png"))
 
 
 class HighMagCheckFailedError(Exception):

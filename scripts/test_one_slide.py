@@ -8,7 +8,7 @@ slide_path = (
 pretiled_h5_path = (
     "/media/hdd3/neo/error_slides_h5/H18-1938;S10;MSKD - 2023-12-12 03.41.46.h5"
 )
-dump_dir = "/media/hdd3/neo/test_error_results_dir"
+dump_dir = "/media/hdd3/neo/test_error_results_dir_tmp"
 
 os.makedirs(dump_dir, exist_ok=True)
 
