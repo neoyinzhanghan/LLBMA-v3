@@ -90,7 +90,7 @@ for subdir in tqdm(subdirs, desc="Processing Result Dirs"):
         os.path.join(root, file)
         for root, _, files in os.walk(cells_dir)
         for file in files
-        if file.endswith(".jpg")
+        if file.endswith(".jpg") and "YOLO" not in file
     ]
 
     if len(jpgs) < num_per_subdir:
