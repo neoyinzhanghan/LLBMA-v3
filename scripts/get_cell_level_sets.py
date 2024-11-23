@@ -2,6 +2,7 @@ import os
 import random
 import pandas as pd
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 from LLBMA.resources.BMAassumptions import *
 
 result_dir = "/media/hdd3/neo/test_error_results_dir_025"
@@ -120,3 +121,64 @@ for subdir in tqdm(subdirs, desc="Processing Result Dirs"):
             # create a symlink to the jpg in the appropriate level directory
             os.symlink(jpg, new_path)
             pseudo_idx += 1
+
+for cell_type in cellnames:
+    level_counts = {}
+    level_counts_no_0_0 = {}
+
+    for level_str in levels_str:
+        level_dir = os.path.join(save_dir, cell_type, level_str)
+
+        if os.path.exists(level_dir):
+            num_jpgs = len(
+                [
+                    file
+                    for file in os.listdir(level_dir)
+                    if os.path.isfile(os.path.join(level_dir, file))
+                ]
+            )
+        else:
+            num_jpgs = 0
+
+        level_counts[level_str] = num_jpgs
+        if level_str != "0_0":
+            level_counts_no_0_0[level_str] = num_jpgs
+
+    # Sort the levels for consistent plotting
+    sorted_levels = sorted(level_counts.keys())
+    sorted_counts = [level_counts[level] for level in sorted_levels]
+
+    sorted_levels_no_0_0 = sorted(level_counts_no_0_0.keys())
+    sorted_counts_no_0_0 = [
+        level_counts_no_0_0[level] for level in sorted_levels_no_0_0
+    ]
+
+    # Ensure the directory for saving plots exists
+    plot_dir = os.path.join(save_dir, cell_type)
+    os.makedirs(plot_dir, exist_ok=True)
+
+    # Plot with 0_0
+    plt.figure(figsize=(10, 6))
+    plt.bar(sorted_levels, sorted_counts, color="blue")
+    plt.title(f"Number of JPGs per Level for {cell_type} (Including 0_0)")
+    plt.xlabel("Levels")
+    plt.ylabel("Number of JPGs")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plot_path = os.path.join(plot_dir, "num_cells.png")
+    plt.savefig(plot_path)
+    plt.close()
+
+    # Plot without 0_0
+    plt.figure(figsize=(10, 6))
+    plt.bar(sorted_levels_no_0_0, sorted_counts_no_0_0, color="green")
+    plt.title(f"Number of JPGs per Level for {cell_type} (Excluding 0_0)")
+    plt.xlabel("Levels")
+    plt.ylabel("Number of JPGs")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plot_path_no_0_0 = os.path.join(plot_dir, "num_cells_no_0_0.png")
+    plt.savefig(plot_path_no_0_0)
+    plt.close()
+
+    print(f"Plots saved for {cell_type}: {plot_path}, {plot_path_no_0_0}")
