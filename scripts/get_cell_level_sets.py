@@ -49,7 +49,7 @@ def find_levels(score: float, levels=all_levels):
         if i == 0:
             continue
         elif score <= levels[i]:
-            print(levels[i])
+            print(f"Score {score} is less than or equal to {levels[i]}")
             return levels[i - 1]
 
     print(f"Score {score} is greater than 1.0")
