@@ -27,7 +27,7 @@ def level_to_str(level: float):
 def get_levels():
     levels = []
     level = 0.0
-    while level < 1.0:
+    while level <= 1.0:
         levels.append(level)
         level += increment
 
