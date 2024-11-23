@@ -27,7 +27,7 @@ def level_to_str(level: float):
 def get_levels():
     levels = []
     level = 0.0
-    while round(level,2) <= 1.0:
+    while round(level, 2) <= 1.0:
         levels.append(level)
         level += increment
 
@@ -39,10 +39,10 @@ def get_levels():
 levels, levels_str = get_levels()
 all_levels, all_level_str = get_levels()
 
-print(levels)
-print(levels_str)
-print(all_levels)
-print(all_level_str)
+# print(levels)
+# print(levels_str)
+# print(all_levels)
+# print(all_level_str)
 
 
 def find_levels(score, levels=all_levels):
@@ -50,9 +50,9 @@ def find_levels(score, levels=all_levels):
         if i == 0:
             continue
         elif score <= levels[i]:
-            print(f"Score {score} is less than or equal to {levels[i]}")
+            # print(f"Score {score} is less than or equal to {levels[i]}")
             return levels[i - 1]
-        print(f"Score {score} is greater than {levels[i]}")
+        # print(f"Score {score} is greater than {levels[i]}")
 
     print(f"Score {score} is greater than 1.0")
     print(f"Score {score} is faulty")
