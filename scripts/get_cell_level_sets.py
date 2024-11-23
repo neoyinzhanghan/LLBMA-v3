@@ -44,6 +44,7 @@ print(levels_str)
 print(all_levels)
 print(all_level_str)
 
+
 def find_levels(score, levels=all_levels):
     for i in range(len(levels)):
         if i == 0:
@@ -51,6 +52,7 @@ def find_levels(score, levels=all_levels):
         elif score <= levels[i]:
             print(f"Score {score} is less than or equal to {levels[i]}")
             return levels[i - 1]
+        print(f"Score {score} is greater than {levels[i]}")
 
     print(f"Score {score} is greater than 1.0")
     print(f"Score {score} is faulty")
@@ -107,7 +109,7 @@ for subdir in tqdm(subdirs, desc="Processing Result Dirs"):
         cell_df_row = cell_df[cell_df["name"] == jpg_name]
 
         for cell_type in cellnames:
-            cell_type_prob = cell_df_row[cell_type].values[0]
+            cell_type_prob = float(cell_df_row[cell_type].values[0])
 
             level = find_levels(cell_type_prob)
             level_str = level_to_str(level)
