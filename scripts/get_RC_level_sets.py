@@ -45,11 +45,9 @@ def find_level(jpeg_path):
 
     score = int(name_no_ext.split("_")[0])  # get the score from the jpeg name
     for i in range(len(levels)):
-        if i == 0 or i == 1:
+        if i == 0:
             continue
-        elif score >= levels[i]:
-            continue
-        elif score < levels[i] and score >= levels[i - 1]:
+        elif score < levels[i]:
             return levels[i - 1]
 
     print(f"Score {score} is greater than 1000000")

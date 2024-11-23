@@ -503,10 +503,11 @@ class BMACounter:
         )
 
         start_time = time.time()
-        hoard_focus_regions_after_high_mag_scores_from_tracker(
-            high_mag_check_tracker,
-            os.path.join(self.save_dir, "focus_regions_debug_hoarding"),
-        )
+        if self.extra_hoarding:
+            hoard_focus_regions_after_high_mag_scores_from_tracker(
+                high_mag_check_tracker,
+                os.path.join(self.save_dir, "focus_regions_debug_hoarding"),
+            )
         self.profiling_data["hoarding_high_mag_check_time"] = time.time() - start_time
 
         good_focus_regions = high_mag_check_tracker.get_good_focus_regions()

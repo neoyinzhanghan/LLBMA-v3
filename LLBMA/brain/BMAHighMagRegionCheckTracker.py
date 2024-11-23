@@ -110,6 +110,7 @@ class BMAHighMagRegionCheckTracker:
             "VoL_high_mag": [],
             "adequate_confidence_score_high_mag": [],
             "selected_high_mag": [],
+            "coordinate": [],
         }
 
         for focus_region in self.focus_regions:
@@ -122,6 +123,7 @@ class BMAHighMagRegionCheckTracker:
                 focus_region.adequate_confidence_score_high_mag
                 > high_mag_region_clf_threshold
             )
+            info_dct["coordinate"].append(focus_region.coordinate)
 
         # create a pandas DataFrame to store the information of the focus regions
         # it should have the following columns:
@@ -191,7 +193,7 @@ class BMAHighMagRegionCheckTracker:
         for index, row in self.info_df.iterrows():
             # Extract the bounding box and confidence score
             TL_x, TL_y, BR_x, BR_y = row["coordinate"]
-            confidence_score = row["adequate_confidence_score"]
+            confidence_score = row["adequate_confidence_score_high_mag"]
 
             # Adjust the coordinates for the downsampling factor
             TL_x_adj = int(TL_x / topview_downsampling_factor)
