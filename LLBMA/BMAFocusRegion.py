@@ -42,10 +42,10 @@ class FocusRegion:
         self.idx = idx
         self.downsampled_coordinate = downsampled_coordinate
         self.coordinate = (
-            downsampled_coordinate[0] * search_view_downsample_rate,
-            downsampled_coordinate[1] * search_view_downsample_rate,
-            downsampled_coordinate[2] * search_view_downsample_rate,
-            downsampled_coordinate[3] * search_view_downsample_rate,
+            downsampled_coordinate[0],
+            downsampled_coordinate[1],
+            downsampled_coordinate[2],
+            downsampled_coordinate[3],
         )
         self.downsampled_image = downsampled_image
         self.image = None
