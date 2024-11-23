@@ -79,8 +79,9 @@ for subdir in tqdm(subdirs, desc="Processing Result Dirs"):
 
     # check how many jpgs are in the cells folder
     jpgs = [
-        os.path.join(cells_dir, file)
-        for file in os.listdir(cells_dir)
+        os.path.join(root, file)
+        for root, _, files in os.walk(cells_dir)
+        for file in files
         if file.endswith(".jpg")
     ]
 
