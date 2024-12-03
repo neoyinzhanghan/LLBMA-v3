@@ -1,0 +1,14 @@
+import os
+import shutil
+
+slide_name = "H18-9786;S10;MSKM - 2023-06-21 21.41.10"
+slide_source_dir = "/pesgisipth/NDPI/"
+
+slide_path = os.path.join(slide_source_dir, slide_name + ".ndpi")
+
+tmp_save_dir = "/media/hdd3/neo/brenda_tmp"
+
+os.makedirs(tmp_save_dir, exist_ok=True)
+
+# rsync the slide to the tmp_save_dir
+shutil.copy(slide_path, tmp_save_dir)
