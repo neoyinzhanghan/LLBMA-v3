@@ -556,3 +556,19 @@ def dyadically_reorganize_svs_levels(input_svs_path, output_svs_path):
         print(
             f"Time taken to dyadically reorganize SVS levels: {elapsed_time:.2f} seconds"
         )
+
+
+if __name__ == "__main__":
+    slide_path = (
+        "/media/hdd3/neo/brenda_tmp/H18-9786;S10;MSKM - 2023-06-21 21.41.10.ndpi"
+    )
+
+    h5_path = "/media/hdd3/neo/brenda_tmp/H18-9786;S10;MSKM - 2023-06-21 21.41.10.h5"
+
+    dzsave_h5(
+        slide_path=slide_path,
+        h5_path=h5_path,
+        tile_size=512,
+        num_cpus=32,
+        region_cropping_batch_size=256,
+    )
