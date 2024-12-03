@@ -11,6 +11,11 @@ import pandas as pd
 from pathlib import Path
 from tqdm import tqdm
 from PIL import Image
+from LLRunner.config import (
+    dzsave_dir,
+    dzsave_metadata_path,
+    tmp_slide_dir,
+)
 
 
 def image_to_jpeg_string(image):
@@ -266,8 +271,6 @@ def crop_wsi_images_all_levels(
 ):
     num_croppers = num_cpus  # Number of croppers is the same as num_cpus
 
-    wsi = openslide.OpenSlide(wsi_path)
-    level_count = wsi.level_count
     if verbose:
         print("Initializing WSICropManager")
 
@@ -276,7 +279,7 @@ def crop_wsi_images_all_levels(
     # Get all the coordinates for 256x256 patches
     focus_regions_coordinates = []
 
-    for level in range(level_count):
+    for level in range(0, 8):
         focus_regions_coordinates.extend(
             ray.get(
                 manager.get_tile_coordinate_level_pairs.remote(
@@ -312,8 +315,6 @@ def crop_wsi_images_all_levels(
                             x, y, wsi_level, jpeg_string = indices_jpeg
                             level = int(18 - wsi_level)
                             f[str(level)][x, y] = jpeg_string
-                            # print(f"Saved patch at level: {level}, x: {x}, y: {y}")
-                            # print(f"jpeg_string: {jpeg_string}")
 
                         pbar.update(len(batch))
 
@@ -323,24 +324,23 @@ def crop_wsi_images_all_levels(
                     del tasks[done_id]
 
 
-def get_depth_from_0_to_N(wsi_path, h5_path, tile_size=256):
+def get_depth_from_0_to_11(wsi_path, h5_path, tile_size=256):
+    # the depth 11 image the the level 7 image from the slide
+    # each depth decrease is a downsample by factor of 2
 
+    # get the depth_11 image
     wsi = openslide.OpenSlide(wsi_path)
-    level_count = wsi.level_count
-
-    assert level_count <= 18, "The slide has more than 18 levels"
-
-    level_top_dimensions = wsi.level_dimensions[level_count - 1]
-    image = wsi.read_region((0, 0), level_count - 1, level_top_dimensions)
+    level_7_dimensions = wsi.level_dimensions[7]
+    image = wsi.read_region((0, 0), 7, level_7_dimensions)
     image = image.convert("RGB")
 
     current_image = image
-    for depth in range(18 - level_count, -1, -1):
+    for depth in range(10, -1, -1):
         # downsample the image by a factor of 2
         current_image = image.resize(
             (
-                int(max(image.width // (2 ** ((18 - level_count) - depth)), 1)),
-                int(max(image.height // (2 ** ((18 - level_count) - depth)), 1)),
+                max(image.width // (2 ** (10 - depth)), 1),
+                max(image.height // (2 ** (10 - depth)), 1),
             )
         )
         # crop 256x256 patches from the downsampled image (don't overlap, dont leave out any boundary patches)
@@ -396,7 +396,7 @@ def dzsave_h5(
 
     starttime = time.time()
 
-    print("Cropping from WSI using native levels")
+    print("Cropping from NDPI")
     crop_wsi_images_all_levels(
         wsi_path,
         h5_path,
@@ -404,13 +404,30 @@ def dzsave_h5(
         crop_size=tile_size,
         num_cpus=num_cpus,
     )
-
     print("Cropping Lower Resolution Levels")
-    get_depth_from_0_to_N(wsi_path, h5_path, tile_size=tile_size)
-
+    get_depth_from_0_to_11(wsi_path, h5_path, tile_size=tile_size)
     time_taken = time.time() - starttime
 
     return time_taken
+
+
+def retrieve_tile_h5(h5_path, level, row, col):
+    with h5py.File(h5_path, "r") as f:
+        try:
+            jpeg_string = f[str(level)][row, col]
+            jpeg_string = decode_image_from_base64(jpeg_string)
+            image = jpeg_string_to_image(jpeg_string)
+
+        except Exception as e:
+            print(
+                f"Error: {e} occurred while retrieving tile at level: {level}, row: {row}, col: {col} from {h5_path}"
+            )
+            jpeg_string = f[str(level)][row, col]
+            print(f"jpeg_string: {jpeg_string}")
+            jpeg_string = decode_image_from_base64(jpeg_string)
+            print(f"jpeg_string base 64 decoded: {jpeg_string}")
+            raise e
+        return image
 
 
 if __name__ == "__main__":
