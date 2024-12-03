@@ -565,10 +565,17 @@ if __name__ == "__main__":
 
     h5_path = "/media/hdd3/neo/brenda_tmp/H18-9786;S10;MSKM - 2023-06-21 21.41.10.h5"
 
+    import time
+
+    start_time = time.time()
+    print(f"Processing slide at {slide_path}")
     dzsave_h5(
-        slide_path=slide_path,
+        wsi_path=slide_path,
         h5_path=h5_path,
         tile_size=512,
         num_cpus=32,
         region_cropping_batch_size=256,
     )
+
+    print("Finished processing slide")
+    print(f"Time taken: {time.time() - start_time} seconds")
