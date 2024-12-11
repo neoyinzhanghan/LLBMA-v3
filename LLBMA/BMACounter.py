@@ -296,7 +296,7 @@ class BMACounter:
             print(f"Using pretiled h5 file at {dzsave_path}. Skipping dzsave h5 step.")
         else:
             dzsave_path = os.path.join(self.save_dir, "slide.h5")
-            dzsave_h5(self.wsi_path, dzsave_path)
+            dzsave_h5(self.wsi_path, dzsave_path, tile_size=focus_regions_size)
 
         self.h5_path = dzsave_path
 
