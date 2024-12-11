@@ -22,5 +22,5 @@ with h5py.File(dzsave_h5_path, "r") as f:
 
 tile = retrieve_tile_h5(dzsave_h5_path, 11, 3, 1)
 
-print(type(tile))
-print(tile.shape)
+print(type(tile)) # should be a PIL.JpegImagePlugin.JpegImageFile
+print(tile.size) # should be (256, 256)F
