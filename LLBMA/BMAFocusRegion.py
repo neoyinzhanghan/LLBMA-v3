@@ -77,7 +77,7 @@ class FocusRegion:
         # Horizontally stack the two images
         # self.image_mask_duo = Image.fromarray(np.hstack((image_array, otsu_rgb)))
 
-        self.adequate_confidence_score = None
+        self.adequate_confidence_score = 2
 
         self.wbc_candidate_bboxes = None
         self.wbc_candidates = None

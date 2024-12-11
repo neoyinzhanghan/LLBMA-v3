@@ -70,7 +70,7 @@ max_num_wbc_per_manager = max_num_cells // num_YOLOManagers
 num_labellers = 2
 num_region_clf_managers = 2
 num_focus_region_makers = 64
-num_focus_region_dataloader_workers = 100
+num_focus_region_dataloader_workers = 64
 num_gpus_per_manager = 1
 num_cpus_per_manager = num_cpus // (num_gpus // num_gpus_per_manager)
 num_cpus_per_cropper = num_cpus // num_croppers
@@ -79,7 +79,7 @@ allowed_reading_time = 60  # in seconds
 region_cropping_batch_size = 512
 region_saving_batch_size = 512
 region_clf_batch_size = 32
-high_mag_region_clf_batch_size = 50
+high_mag_region_clf_batch_size = 10
 cell_clf_batch_size = 256
 YOLO_batch_size = 32
 

@@ -38,7 +38,7 @@ from LLBMA.BMAFocusRegion import *
 from LLBMA.BMAFocusRegionTracker import FocusRegionsTracker, NotEnoughFocusRegionsError
 from LLBMA.brain.BMAHighMagRegionCheckTracker import BMAHighMagRegionCheckTracker
 from LLBMA.resources.BMAassumptions import *
-from LLBMA.tiling.dzsave_h5 import dzsave_h5
+from LLBMA.tiling.dzsave_h5_with_FR_creation import dzsave_h5_with_FR_creation
 from LLBMA.debug.hoarding import hoard_focus_regions_after_high_mag_scores_from_tracker
 
 
@@ -298,7 +298,11 @@ class BMACounter:
             print(f"Using pretiled h5 file at {dzsave_path}. Skipping dzsave h5 step.")
         else:
             dzsave_path = os.path.join(self.save_dir, "slide.h5")
-            dzsave_h5(self.wsi_path, dzsave_path, tile_size=focus_regions_size)
+            time_taken, focus_regions = dzsave_h5_with_FR_creation(
+                self.wsi_path, dzsave_path, tile_size=focus_regions_size
+            )
+
+            self.focus_regions = focus_regions
 
         self.h5_path = dzsave_path
 
@@ -315,115 +319,118 @@ class BMACounter:
         """Return the focus regions of the highest magnification view."""
 
         start_time = time.time()
-        os.makedirs(os.path.join(self.save_dir, "focus_regions"), exist_ok=True)
 
-        # First get a list of the focus regions coordinates based on focus_regions_size at highest level of magnification
-        # if the dimension is not divisible by the focus_regions_size, then we simply omit the last focus region
+        if self.pretiled_h5_path is not None:
 
-        # get the dimension of the highest mag, which is the level 0
-        # get the level 0 dimension using
-        wsi = openslide.OpenSlide(self.wsi_path)
-        search_view_dimension = wsi.level_dimensions[0]
-        wsi.close()
+            os.makedirs(os.path.join(self.save_dir, "focus_regions"), exist_ok=True)
 
-        dimx, dimy = search_view_dimension
+            # First get a list of the focus regions coordinates based on focus_regions_size at highest level of magnification
+            # if the dimension is not divisible by the focus_regions_size, then we simply omit the last focus region
 
-        # get the number of focus regions in the x and y direction
-        num_focus_regions_x = dimx // search_view_focus_regions_size
-        num_focus_regions_y = dimy // search_view_focus_regions_size
+            # get the dimension of the highest mag, which is the level 0
+            # get the level 0 dimension using
+            wsi = openslide.OpenSlide(self.wsi_path)
+            search_view_dimension = wsi.level_dimensions[0]
+            wsi.close()
 
-        # get the list of focus regions coordinates
-        search_view_focus_regions_coordinates = []
+            dimx, dimy = search_view_dimension
 
-        for i in range(num_focus_regions_x):
-            for j in range(num_focus_regions_y):
-                search_view_focus_regions_coordinates.append(
-                    (
-                        i * search_view_focus_regions_size,
-                        j * search_view_focus_regions_size,
-                        (i + 1) * search_view_focus_regions_size,
-                        (j + 1) * search_view_focus_regions_size,
-                    )
-                )
+            # get the number of focus regions in the x and y direction
+            num_focus_regions_x = dimx // search_view_focus_regions_size
+            num_focus_regions_y = dimy // search_view_focus_regions_size
 
-        search_view_focus_regions_coordinates = (
-            self.top_view.filter_coordinates_with_mask(
-                search_view_focus_regions_coordinates
-            )
-        )
+            # get the list of focus regions coordinates
+            search_view_focus_regions_coordinates = []
 
-        # # take the 300 focus regions from the middle of the list which is len(focus_regions_coordinates) // 2 - 150 to len(focus_regions_coordinates) // 2 + 150
-        # half = 300 // 2
-        # focus_regions_coordinates = focus_regions_coordinates[
-        #     len(focus_regions_coordinates) // 2
-        #     - half : len(focus_regions_coordinates) // 2
-        #     + half
-        # ]
-
-        ray.shutdown()
-        ray.init(
-            num_cpus=num_cpus,
-            num_gpus=num_gpus,
-            runtime_env={"env_vars": {"HDF5_USE_FILE_LOCKING": "FALSE"}},
-        )
-
-        focus_regions_coordinates = [
-            (
-                coord[0] * (2**search_view_level),
-                coord[1] * (2**search_view_level),
-                coord[2] * (2**search_view_level),
-                coord[3] * (2**search_view_level),
-            )
-            for coord in search_view_focus_regions_coordinates
-        ]
-
-        list_of_batches = create_list_of_batches_from_list(
-            focus_regions_coordinates, region_cropping_batch_size
-        )
-
-        if self.verbose:
-            print("Initializing WSICropManager")
-
-        task_managers = [
-            WSIH5FocusRegionCreationManager.remote(self.h5_path)
-            for _ in range(num_focus_region_maker)
-        ]
-
-        tasks = {}
-        all_results = []
-
-        for i, batch in enumerate(list_of_batches):
-            manager = task_managers[i % num_focus_region_maker]
-            task = manager.async_get_bma_focus_region_batch.remote(batch)
-            tasks[task] = batch
-
-        with tqdm(
-            total=len(focus_regions_coordinates), desc="Gathering focus regions"
-        ) as pbar:
-            while tasks:
-                done_ids, _ = ray.wait(list(tasks.keys()))
-
-                for done_id in done_ids:
-                    try:
-                        batch = ray.get(done_id)
-
-                        all_results.extend(batch)
-
-                        pbar.update(len(batch))
-
-                    except RayTaskError as e:
-                        self.error = True
-                        print(
-                            f"Task for focus region {tasks[done_id]} failed with error: {e}"
+            for i in range(num_focus_regions_x):
+                for j in range(num_focus_regions_y):
+                    search_view_focus_regions_coordinates.append(
+                        (
+                            i * search_view_focus_regions_size,
+                            j * search_view_focus_regions_size,
+                            (i + 1) * search_view_focus_regions_size,
+                            (j + 1) * search_view_focus_regions_size,
                         )
+                    )
 
-                    del tasks[done_id]
+            search_view_focus_regions_coordinates = (
+                self.top_view.filter_coordinates_with_mask(
+                    search_view_focus_regions_coordinates
+                )
+            )
 
-        if self.verbose:
-            print(f"Shutting down Ray")
-        ray.shutdown()
+            # # take the 300 focus regions from the middle of the list which is len(focus_regions_coordinates) // 2 - 150 to len(focus_regions_coordinates) // 2 + 150
+            # half = 300 // 2
+            # focus_regions_coordinates = focus_regions_coordinates[
+            #     len(focus_regions_coordinates) // 2
+            #     - half : len(focus_regions_coordinates) // 2
+            #     + half
+            # ]
 
-        self.focus_regions = all_results
+            ray.shutdown()
+            ray.init(
+                num_cpus=num_cpus,
+                num_gpus=num_gpus,
+                runtime_env={"env_vars": {"HDF5_USE_FILE_LOCKING": "FALSE"}},
+            )
+
+            focus_regions_coordinates = [
+                (
+                    coord[0] * (2**search_view_level),
+                    coord[1] * (2**search_view_level),
+                    coord[2] * (2**search_view_level),
+                    coord[3] * (2**search_view_level),
+                )
+                for coord in search_view_focus_regions_coordinates
+            ]
+
+            list_of_batches = create_list_of_batches_from_list(
+                focus_regions_coordinates, region_cropping_batch_size
+            )
+
+            if self.verbose:
+                print("Initializing WSICropManager")
+
+            task_managers = [
+                WSIH5FocusRegionCreationManager.remote(self.h5_path)
+                for _ in range(num_focus_region_maker)
+            ]
+
+            tasks = {}
+            all_results = []
+
+            for i, batch in enumerate(list_of_batches):
+                manager = task_managers[i % num_focus_region_maker]
+                task = manager.async_get_bma_focus_region_batch.remote(batch)
+                tasks[task] = batch
+
+            with tqdm(
+                total=len(focus_regions_coordinates), desc="Gathering focus regions"
+            ) as pbar:
+                while tasks:
+                    done_ids, _ = ray.wait(list(tasks.keys()))
+
+                    for done_id in done_ids:
+                        try:
+                            batch = ray.get(done_id)
+
+                            all_results.extend(batch)
+
+                            pbar.update(len(batch))
+
+                        except RayTaskError as e:
+                            self.error = True
+                            print(
+                                f"Task for focus region {tasks[done_id]} failed with error: {e}"
+                            )
+
+                        del tasks[done_id]
+
+            if self.verbose:
+                print(f"Shutting down Ray")
+            ray.shutdown()
+
+            self.focus_regions = all_results
 
         self.profiling_data["cropping_focus_regions_time"] = time.time() - start_time
 

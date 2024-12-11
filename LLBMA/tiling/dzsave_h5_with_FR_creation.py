@@ -16,6 +16,8 @@ from LLRunner.config import (
     dzsave_metadata_path,
     tmp_slide_dir,
 )
+from LLBMA.BMAFocusRegion import FocusRegion
+from LLBMA.resources.BMAassumptions import *
 
 
 def image_to_jpeg_string(image):
@@ -80,7 +82,7 @@ def create_list_of_batches_from_list(list, batch_size):
 
 
 def initialize_final_h5py_file(
-    h5_path, image_width, image_height, num_levels=18, patch_size=256
+    h5_path, image_width, image_height, num_levels=18, patch_size=512
 ):
     """
     Create an HDF5 file with a dataset that stores tiles, indexed by row and column.
@@ -88,7 +90,7 @@ def initialize_final_h5py_file(
     Parameters:
         h5_path (str): Path where the HDF5 file will be created.
         image_shape (tuple): Shape of the full image (height, width, channels).
-        patch_size (int): The size of each image patch (default: 256).
+        patch_size (int): The size of each image patch (default: 512).
 
     Raises:
         AssertionError: If the file already exists at h5_path.
@@ -157,7 +159,7 @@ def initialize_final_h5py_file(
 
 
 @ray.remote
-class WSICropManager:
+class WSICropManagerWithFRCreation:
     """
     A class representing a manager that crops WSIs.
     Each Manager object is assigned with a single CPU core and is responsible for cropping a subset of the coordinates from a given WSI.
@@ -166,11 +168,14 @@ class WSICropManager:
     wsi_path: str: The path to the WSI.
     wsi: openslide.OpenSlide: The WSI object.
 
+    topview: TopView object: The top view of the WSI.
+
     """
 
-    def __init__(self, wsi_path) -> None:
+    def __init__(self, wsi_path, topview) -> None:
         self.wsi_path = wsi_path
         self.wsi = None
+        self.topview = topview
 
     def open_slide(self):
         """Open the WSI."""
@@ -193,8 +198,8 @@ class WSICropManager:
             self.open_slide()
         return self.wsi.level_dimensions[wsi_level]
 
-    def get_tile_coordinate_level_pairs(self, tile_size=256, wsi_level=0):
-        """Generate a list of coordinates_leve for 256x256 disjoint patches."""
+    def get_tile_coordinate_level_pairs(self, tile_size=512, wsi_level=0):
+        """Generate a list of coordinates_leve for 512x512 disjoint patches."""
         if self.wsi is None:
             self.open_slide()
 
@@ -236,11 +241,12 @@ class WSICropManager:
         return image
 
     def async_get_bma_focus_region_level_pair_batch(
-        self, focus_region_coords_level_pairs, crop_size=256
+        self, focus_region_coords_level_pairs, crop_size=512
     ):
         """Save a list of focus regions."""
 
         indices_to_jpeg = []
+        focus_regions = []
         for focus_region_coord_level_pair in focus_region_coords_level_pairs:
             focus_region_coord, wsi_level = focus_region_coord_level_pair
 
@@ -258,14 +264,38 @@ class WSICropManager:
 
             indices_to_jpeg.append(indices_level_jpeg)
 
-        return indices_to_jpeg
+            if wsi_level == 0 and self.topview.is_in_mask(focus_region_coord):
+                # if image is not a square, skip it
+                if (
+                    focus_region_coord[2] - focus_region_coord[0]
+                    != focus_region_coord[3] - focus_region_coord[1]
+                ):
+                    continue
+
+                downsampled_image = image.resize(
+                    (
+                        focus_regions_size // (2**search_view_level),
+                        focus_regions_size // (2**search_view_level),
+                    )
+                )
+
+                focus_region = FocusRegion(
+                    downsampled_coordinate=focus_region_coord,
+                    downsampled_image=downsampled_image,
+                )
+
+                focus_region.get_image(image)
+
+                focus_regions.append(focus_region)
+
+        return indices_to_jpeg, focus_regions
 
 
 def crop_wsi_images_all_levels(
     wsi_path,
     h5_path,
     region_cropping_batch_size,
-    crop_size=256,
+    crop_size=512,
     verbose=True,
     num_cpus=32,
 ):
@@ -274,9 +304,9 @@ def crop_wsi_images_all_levels(
     if verbose:
         print("Initializing WSICropManager")
 
-    manager = WSICropManager.remote(wsi_path)
+    manager = WSICropManagerWithFRCreation.remote(wsi_path)
 
-    # Get all the coordinates for 256x256 patches
+    # Get all the coordinates for 512x512 patches
     focus_regions_coordinates = []
 
     for level in range(0, 8):
@@ -291,9 +321,13 @@ def crop_wsi_images_all_levels(
         focus_regions_coordinates, region_cropping_batch_size
     )
 
-    task_managers = [WSICropManager.remote(wsi_path) for _ in range(num_croppers)]
+    task_managers = [
+        WSICropManagerWithFRCreation.remote(wsi_path) for _ in range(num_croppers)
+    ]
 
     tasks = {}
+
+    focus_regions = []
 
     for i, batch in enumerate(list_of_batches):
         manager = task_managers[i % num_croppers]
@@ -310,11 +344,13 @@ def crop_wsi_images_all_levels(
 
                 for done_id in done_ids:
                     try:
-                        batch = ray.get(done_id)
+                        batch, focus_regions = ray.get(done_id)
                         for indices_jpeg in batch:
                             x, y, wsi_level, jpeg_string = indices_jpeg
                             level = int(18 - wsi_level)
                             f[str(level)][x, y] = jpeg_string
+
+                        focus_regions.extend(focus_regions)
 
                         pbar.update(len(batch))
 
@@ -323,8 +359,10 @@ def crop_wsi_images_all_levels(
 
                     del tasks[done_id]
 
+    return focus_regions
 
-def get_depth_from_0_to_11(wsi_path, h5_path, tile_size=256):
+
+def get_depth_from_0_to_11(wsi_path, h5_path, tile_size=512):
     # the depth 11 image the the level 7 image from the slide
     # each depth decrease is a downsample by factor of 2
 
@@ -343,7 +381,7 @@ def get_depth_from_0_to_11(wsi_path, h5_path, tile_size=256):
                 max(image.height // (2 ** (10 - depth + 1)), 1),
             )
         )
-        # crop 256x256 patches from the downsampled image (don't overlap, dont leave out any boundary patches)
+        # crop 512x512 patches from the downsampled image (don't overlap, dont leave out any boundary patches)
         for y in range(0, current_image.height, tile_size):
             for x in range(0, current_image.width, tile_size):
                 # Calculate the right and bottom coordinates ensuring they are within the image boundaries
@@ -370,12 +408,12 @@ def get_depth_from_0_to_11(wsi_path, h5_path, tile_size=256):
                         )
 
 
-def dzsave_h5(
+def dzsave_h5_with_FR_creation(
     wsi_path,
     h5_path,
-    tile_size=256,
+    tile_size=512,
     num_cpus=32,
-    region_cropping_batch_size=256,
+    region_cropping_batch_size=512,
 ):
     """
     Create a DeepZoom image pyramid from a WSI.
@@ -397,7 +435,7 @@ def dzsave_h5(
     starttime = time.time()
 
     print("Cropping from NDPI")
-    crop_wsi_images_all_levels(
+    focus_regions = crop_wsi_images_all_levels(
         wsi_path,
         h5_path,
         region_cropping_batch_size=region_cropping_batch_size,
@@ -408,7 +446,7 @@ def dzsave_h5(
     get_depth_from_0_to_11(wsi_path, h5_path, tile_size=tile_size)
     time_taken = time.time() - starttime
 
-    return time_taken
+    return time_taken, focus_regions
 
 
 def retrieve_tile_h5(h5_path, level, row, col):
@@ -441,12 +479,12 @@ if __name__ == "__main__":
 
     start_time = time.time()
     print(f"Processing slide at {slide_path}")
-    dzsave_h5(
+    dzsave_h5_with_FR_creation(
         wsi_path=slide_path,
         h5_path=h5_path,
         tile_size=512,
         num_cpus=32,
-        region_cropping_batch_size=256,
+        region_cropping_batch_size=512,
     )
 
     print("Finished processing slide")

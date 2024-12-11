@@ -63,6 +63,8 @@ class TopView:
 
     - is_bma : whether the top view is a bone marrow aspirate top view
     - verbose : whether to print out the progress of the top view
+
+    - binary_mask_np : the binary mask of the top view as a numpy array
     """
 
     def __init__(self, image, downsampling_rate, level, verbose=False, is_bma=True):
@@ -73,6 +75,8 @@ class TopView:
         self.is_bma = is_bma
         self.downsampling_rate = downsampling_rate
         self.level = level
+
+        self.binary_mask_np = None
 
         if self.verbose:
             print("Checking the type of image...")
@@ -128,6 +132,36 @@ class TopView:
         """Return True iff the top view is a peripheral blood top view."""
         return True
 
+    def is_in_mask(self, coordinate):
+        """Return True iff the coordinate is within the mask area."""
+
+        if self.binary_mask_np is None:
+            # make sure to get a cv2 format of the mask as a binary numpy array
+            mask_np = cv2.cvtColor(np.array(self.mask), cv2.COLOR_RGB2GRAY)
+
+            # make sure to convert mask_np to a binary mask
+            _, mask_np = cv2.threshold(mask_np, 127, 255, cv2.THRESH_BINARY)
+
+            self.binary_mask_np = mask_np
+
+        # Adjust coordinates by downsampling factor
+        TL_x_adj, TL_y_adj, BR_x_adj, BR_y_adj = [
+            int(coord / (topview_downsampling_factor // search_view_downsample_rate))
+            for coord in coordinate
+        ]
+
+        # Check if the box is within the mask area
+        # Ensuring the coordinates are within the mask dimensions
+        TL_x_adj, TL_y_adj = max(0, TL_x_adj), max(0, TL_y_adj)
+        BR_x_adj, BR_y_adj = min(self.binary_mask_np.shape[1], BR_x_adj), min(
+            self.binary_mask_np.shape[0], BR_y_adj
+        )
+
+        if np.any(self.binary_mask_np[TL_y_adj:BR_y_adj, TL_x_adj:BR_x_adj]):
+            return True
+
+        return False
+
     def filter_coordinates_with_mask(self, coordinates):
         """Filters out coordinates not in the binary mask area.
 
@@ -138,11 +172,14 @@ class TopView:
             list of tuples: Filtered list of coordinates.
         """
 
-        # make sure to get a cv2 format of the mask as a binary numpy array
-        mask_np = cv2.cvtColor(np.array(self.mask), cv2.COLOR_RGB2GRAY)
+        if self.binary_mask_np is None:
+            # make sure to get a cv2 format of the mask as a binary numpy array
+            mask_np = cv2.cvtColor(np.array(self.mask), cv2.COLOR_RGB2GRAY)
 
-        # make sure to convert mask_np to a binary mask
-        _, mask_np = cv2.threshold(mask_np, 127, 255, cv2.THRESH_BINARY)
+            # make sure to convert mask_np to a binary mask
+            _, mask_np = cv2.threshold(mask_np, 127, 255, cv2.THRESH_BINARY)
+
+            self.binary_mask_np = mask_np
 
         filtered_coordinates = []
 
@@ -158,11 +195,11 @@ class TopView:
             # Check if the box is within the mask area
             # Ensuring the coordinates are within the mask dimensions
             TL_x_adj, TL_y_adj = max(0, TL_x_adj), max(0, TL_y_adj)
-            BR_x_adj, BR_y_adj = min(mask_np.shape[1], BR_x_adj), min(
-                mask_np.shape[0], BR_y_adj
+            BR_x_adj, BR_y_adj = min(self.binary_mask_np.shape[1], BR_x_adj), min(
+                self.binary_mask_np.shape[0], BR_y_adj
             )
 
-            if np.any(mask_np[TL_y_adj:BR_y_adj, TL_x_adj:BR_x_adj]):
+            if np.any(self.binary_mask_np[TL_y_adj:BR_y_adj, TL_x_adj:BR_x_adj]):
                 # If any part of the box is within the mask, keep it
                 filtered_coordinates.append(box)
 
