@@ -4,7 +4,7 @@ from LLBMA.front_end.api import analyse_bma
 
 slide_path = "/media/hdd3/neo/error_slides_ndpi/test_slide.ndpi"
 pretiled_h5_path = None
-dump_dir = "/media/hdd3/neo/test_error_results_dir_tmp"
+dump_dir = "/media/hdd3/neo/test_error_results_dir_new"
 
 os.makedirs(dump_dir, exist_ok=True)
 
@@ -25,6 +25,7 @@ if __name__ == "__main__":
         slide_path=slide_path,
         dump_dir=dump_dir,
         hoarding=True,
+        extra_hoarding=False,
         continue_on_error=True,
         do_extract_features=False,
         check_specimen_clf=False,

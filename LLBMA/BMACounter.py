@@ -84,13 +84,10 @@ class BMACounter:
         keep_h5: bool = True,
     ):
         """Initialize a BMACounter object."""
-
-        self.profiling_data = {}
-
         start_time = time.time()
 
+        self.profiling_data = {}
         self.dump_dir = dump_dir
-
         self.verbose = verbose
         self.hoarding = hoarding
         self.continue_on_error = continue_on_error
@@ -292,6 +289,8 @@ class BMACounter:
         Create a dzsave of the slide at the save_dir.
         """
 
+        start_time = time.time()
+
         if self.pretiled_h5_path is not None:
             dzsave_path = self.pretiled_h5_path
             print(f"Using pretiled h5 file at {dzsave_path}. Skipping dzsave h5 step.")
@@ -300,6 +299,8 @@ class BMACounter:
             dzsave_h5(self.wsi_path, dzsave_path)
 
         self.h5_path = dzsave_path
+
+        self.profiling_data["dzsave_time"] = time.time() - start_time
 
     def delete_dzsave(self):
         """
@@ -498,18 +499,24 @@ class BMACounter:
 
         # start_time = time.time()
 
+        high_mag_check_start_time = time.time()
+
         high_mag_check_tracker = BMAHighMagRegionCheckTracker(
             focus_regions=self.focus_regions,
             save_dir=self.save_dir,
         )
 
-        start_time = time.time()
         if self.extra_hoarding:
+            start_time = time.time()
             hoard_focus_regions_after_high_mag_scores_from_tracker(
                 high_mag_check_tracker,
                 os.path.join(self.save_dir, "focus_regions_debug_hoarding"),
             )
-        self.profiling_data["hoarding_high_mag_check_time"] = time.time() - start_time
+            self.profiling_data["hoarding_high_mag_check_time"] = (
+                time.time() - start_time
+            )
+        else:
+            self.profiling_data["hoarding_high_mag_check_time"] = 0
 
         good_focus_regions = high_mag_check_tracker.get_good_focus_regions()
 
@@ -527,7 +534,11 @@ class BMACounter:
             self.top_view.image, self.save_dir
         )
 
-        self.profiling_data["high_mag_check_time"] = time.time() - start_time
+        self.profiling_data["high_mag_check_time"] = (
+            time.time()
+            - high_mag_check_start_time
+            - self.profiling_data["hoarding_high_mag_check_time"]
+        )
 
     def find_wbc_candidates(self):
         """Update the wbc_candidates of the BMACounter object."""
@@ -1102,12 +1113,12 @@ class BMACounter:
             #     ]
             # )
 
-            self.profiling_data["hoarding_time"] = (
-                self.profiling_data["high_mag_focus_regions_hoarding_time"]
-                + self.profiling_data["hoarding_focus_regions_time"]
-                + self.profiling_data["cells_hoarding_time"]
-                + self.profiling_data["total_features_hoarding_time"]
-                + self.profiling_data["hoarding_high_mag_check_time"]
+            lst_of_hoarding_time_keys = [
+                key for key in self.profiling_data.keys() if "hoarding" in key
+            ]
+
+            self.profiling_data["total_hoarding_time"] = sum(
+                [self.profiling_data[key] for key in lst_of_hoarding_time_keys]
             )
 
             self.profiling_data["total_non_hoarding_time"] = (
