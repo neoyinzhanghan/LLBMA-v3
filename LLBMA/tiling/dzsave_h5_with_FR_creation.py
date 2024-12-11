@@ -265,6 +265,7 @@ class WSICropManagerWithFRCreation:
             indices_to_jpeg.append(indices_level_jpeg)
 
             if wsi_level == 0 and self.topview.is_in_mask(focus_region_coord):
+                print("Focus region is in mask") # TODO remove this line it is for debugging
                 # if image is not a square, skip it
                 if (
                     focus_region_coord[2] - focus_region_coord[0]
