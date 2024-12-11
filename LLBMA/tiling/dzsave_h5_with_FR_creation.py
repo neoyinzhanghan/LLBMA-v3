@@ -438,9 +438,9 @@ def dzsave_h5_with_FR_creation(
 
     print("Cropping from NDPI")
     focus_regions = crop_wsi_images_all_levels(
-        wsi_path,
-        h5_path,
-        topview,
+        wsi_path=wsi_path,
+        h5_path=h5_path,
+        topview=topview,
         region_cropping_batch_size=region_cropping_batch_size,
         crop_size=tile_size,
         num_cpus=num_cpus,
