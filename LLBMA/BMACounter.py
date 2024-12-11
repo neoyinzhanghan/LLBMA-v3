@@ -299,7 +299,7 @@ class BMACounter:
         else:
             dzsave_path = os.path.join(self.save_dir, "slide.h5")
             time_taken, focus_regions = dzsave_h5_with_FR_creation(
-                self.wsi_path, dzsave_path, self.topview, tile_size=focus_regions_size
+                self.wsi_path, dzsave_path, self.top_view, tile_size=focus_regions_size
             )
 
             self.focus_regions = focus_regions
