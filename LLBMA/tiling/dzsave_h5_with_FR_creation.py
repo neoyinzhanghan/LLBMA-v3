@@ -294,6 +294,7 @@ class WSICropManagerWithFRCreation:
 def crop_wsi_images_all_levels(
     wsi_path,
     h5_path,
+    topview,
     region_cropping_batch_size,
     crop_size=512,
     verbose=True,
@@ -304,7 +305,7 @@ def crop_wsi_images_all_levels(
     if verbose:
         print("Initializing WSICropManager")
 
-    manager = WSICropManagerWithFRCreation.remote(wsi_path)
+    manager = WSICropManagerWithFRCreation.remote(wsi_path, topview)
 
     # Get all the coordinates for 512x512 patches
     focus_regions_coordinates = []
@@ -411,6 +412,7 @@ def get_depth_from_0_to_11(wsi_path, h5_path, tile_size=512):
 def dzsave_h5_with_FR_creation(
     wsi_path,
     h5_path,
+    topview,
     tile_size=512,
     num_cpus=32,
     region_cropping_batch_size=512,
@@ -438,6 +440,7 @@ def dzsave_h5_with_FR_creation(
     focus_regions = crop_wsi_images_all_levels(
         wsi_path,
         h5_path,
+        topview,
         region_cropping_batch_size=region_cropping_batch_size,
         crop_size=tile_size,
         num_cpus=num_cpus,
