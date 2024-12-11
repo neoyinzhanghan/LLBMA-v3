@@ -166,7 +166,9 @@ class BMAHighMagRegionCheckTracker:
     def save_results(self, save_dir):
 
         # save the df in the save_dir/focus_regions/high_mag_focus_regions_info.csv
-        self.info_df.to_csv(f"{save_dir}/focus_regions/high_mag_focus_regions_info.csv")
+        self.info_df.to_csv(
+            f"{save_dir}/focus_regions/high_mag_focus_regions_info.csv", index=False
+        )
 
     def save_high_mag_score_plot(self):
 
