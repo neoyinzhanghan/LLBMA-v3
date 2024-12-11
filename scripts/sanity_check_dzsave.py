@@ -5,6 +5,12 @@ dzsave_h5_path = "/media/hdd3/neo/test_error_results_dir_tmp/test_slide/slide.h5
 
 # open the h5 file
 with h5py.File(dzsave_h5_path, "r") as f:
+
+    print(f.keys())
+
+    for key in f.keys():
+        print(f"{key}: {f[key].shape}")
+
     # get the "0" dataset
     dataset = f["3"]
 
