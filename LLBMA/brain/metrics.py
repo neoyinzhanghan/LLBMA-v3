@@ -1,3 +1,6 @@
+from LLBMA.resources.BMAassumptions import snap_shot_size
+
+
 def bb_intersection_over_union(boxA, boxB):
     """
     Credit: This code is obtained from https://gist.github.com/meyerjo/dd3533edc97c81258898f60d8978eddc
@@ -19,6 +22,57 @@ def bb_intersection_over_union(boxA, boxB):
     # rectangles
     boxAArea = abs((boxA.iloc[2] - boxA.iloc[0]) * (boxA.iloc[3] - boxA.iloc[1]))
     boxBArea = abs((boxB.iloc[2] - boxB.iloc[0]) * (boxB.iloc[3] - boxB.iloc[1]))
+
+    # compute the intersection over union by taking the intersection
+    # area and dividing it by the sum of prediction + ground-truth
+    # areas - the interesection area
+    iou = interArea / float(boxAArea + boxBArea - interArea)
+
+    # return the intersection over union value
+    return iou
+
+
+def bb_intersection_over_union_fixed_dims(boxA, boxB, box_size=snap_shot_size):
+    """
+    Compute the intersection over union of two bounding boxes.
+    Assuming the boxes are stored in an iterable of length 4. In the format of (TL_x, TL_y, BR_x, BR_y).
+    """
+
+    centroid_x_boxA, centroid_y_boxA = (boxA.iloc[0] + boxA.iloc[2]) / 2, (
+        boxA.iloc[1] + boxA.iloc[3]
+    ) / 2
+    centroid_x_boxB, centroid_y_boxB = (boxB.iloc[0] + boxB.iloc[2]) / 2, (
+        boxB.iloc[1] + boxB.iloc[3]
+    ) / 2
+
+    boxA = (
+        centroid_x_boxA - box_size // 2,
+        centroid_y_boxA - box_size // 2,
+        centroid_x_boxA + box_size // 2,
+        centroid_y_boxA + box_size // 2,
+    )
+
+    boxB = (
+        centroid_x_boxB - box_size // 2,
+        centroid_y_boxB - box_size // 2,
+        centroid_x_boxB + box_size // 2,
+        centroid_y_boxB + box_size // 2,
+    )
+
+    # determine the (x, y)-coordinates of the intersection rectangle
+    xA = max(boxA.iloc[0], boxB.iloc[0])
+    yA = max(boxA.iloc[1], boxB.iloc[1])
+    xB = min(boxA.iloc[0] + box_size, boxB.iloc[0] + box_size)
+    yB = min(boxA.iloc[1] + box_size, boxB.iloc[1] + box_size)
+
+    # compute the area of intersection rectangle
+    interArea = abs(max((xB - xA, 0)) * max((yB - yA), 0))
+    if interArea == 0:
+        return 0
+    # compute the area of both the prediction and ground-truth
+    # rectangles
+    boxAArea = abs(box_size * box_size)
+    boxBArea = abs(box_size * box_size)
 
     # compute the intersection over union by taking the intersection
     # area and dividing it by the sum of prediction + ground-truth
