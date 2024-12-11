@@ -60,10 +60,10 @@ def bb_intersection_over_union_fixed_dims(boxA, boxB, box_size=snap_shot_size):
     )
 
     # determine the (x, y)-coordinates of the intersection rectangle
-    xA = max(boxA.iloc[0], boxB.iloc[0])
-    yA = max(boxA.iloc[1], boxB.iloc[1])
-    xB = min(boxA.iloc[0] + box_size, boxB.iloc[0] + box_size)
-    yB = min(boxA.iloc[1] + box_size, boxB.iloc[1] + box_size)
+    xA = max(boxA[0], boxB[0])
+    yA = max(boxA[1], boxB[1])
+    xB = min(boxA[0] + box_size, boxB[0] + box_size)
+    yB = min(boxA[1] + box_size, boxB[1] + box_size)
 
     # compute the area of intersection rectangle
     interArea = abs(max((xB - xA, 0)) * max((yB - yA), 0))

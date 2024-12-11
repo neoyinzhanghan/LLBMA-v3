@@ -50,10 +50,14 @@ class FocusRegionsTracker:
     - final_min_conf_thres : the final minimum confidence threshold of the focus regions
     - region_clf_model : the region classifier
 
+    - run_low_mag : a boolean indicating whether to run the low mag region classifier
+
     """
 
-    def __init__(self, focus_regions) -> None:
+    def __init__(self, focus_regions, run_low_mag=False) -> None:
         """Initialize a FocusRegionsTracker object."""
+
+        self.run_low_mag = run_low_mag
 
         for i, focus_region in enumerate(focus_regions):
             focus_region.idx = i
@@ -86,62 +90,67 @@ class FocusRegionsTracker:
         self.final_min_conf_thres = None
 
     def compute_resnet_confidence(self):
-        """ """
 
-        ray.shutdown()
-        ray.init()
+        if self.run_low_mag:
+            ray.shutdown()
+            ray.init()
 
-        region_clf_managers = [
-            RegionClfManager.remote(region_clf_ckpt_path)
-            for _ in range(num_region_clf_managers)
-        ]
+            region_clf_managers = [
+                RegionClfManager.remote(region_clf_ckpt_path)
+                for _ in range(num_region_clf_managers)
+            ]
 
-        tasks = {}
-        new_focus_region_dct = {}
+            tasks = {}
+            new_focus_region_dct = {}
 
-        focus_regions = list(self.focus_regions_dct.values())
+            focus_regions = list(self.focus_regions_dct.values())
 
-        list_of_batches = create_list_of_batches_from_list(
-            focus_regions, region_clf_batch_size
-        )
+            list_of_batches = create_list_of_batches_from_list(
+                focus_regions, region_clf_batch_size
+            )
 
-        for i, batch in enumerate(list_of_batches):
-            manager = region_clf_managers[i % num_region_clf_managers]
-            task = manager.async_predict_batch_key_dct.remote(batch)
-            tasks[task] = batch
+            for i, batch in enumerate(list_of_batches):
+                manager = region_clf_managers[i % num_region_clf_managers]
+                task = manager.async_predict_batch_key_dct.remote(batch)
+                tasks[task] = batch
 
-        with tqdm(
-            total=len(self.focus_regions_dct), desc="Getting ResNet Confidence Scores"
-        ) as pbar:
-            while tasks:
-                done_ids, _ = ray.wait(list(tasks.keys()))
+            with tqdm(
+                total=len(self.focus_regions_dct),
+                desc="Getting ResNet Confidence Scores",
+            ) as pbar:
+                while tasks:
+                    done_ids, _ = ray.wait(list(tasks.keys()))
 
-                for done_id in done_ids:
-                    try:
-                        results = ray.get(done_id)
-                        for k in results:
-                            new_focus_region_dct[k] = results[k]
+                    for done_id in done_ids:
+                        try:
+                            results = ray.get(done_id)
+                            for k in results:
+                                new_focus_region_dct[k] = results[k]
 
-                            pbar.update()
+                                pbar.update()
 
-                    except RayTaskError as e:
-                        print(
-                            f"Task for focus region {tasks[done_id]} failed with error: {e}"
-                        )
-                    del tasks[done_id]
+                        except RayTaskError as e:
+                            print(
+                                f"Task for focus region {tasks[done_id]} failed with error: {e}"
+                            )
+                        del tasks[done_id]
 
-        ray.shutdown()
+            ray.shutdown()
 
-        self.focus_regions_dct = new_focus_region_dct
+            self.focus_regions_dct = new_focus_region_dct
 
-        # update the info_df with the confidence scores
-        self.info_df["adequate_confidence_score"] = np.nan
+            # update the info_df with the confidence scores
+            self.info_df["adequate_confidence_score"] = np.nan
 
-        # update the info_df with the confidence scores
-        for idx in self.focus_regions_dct:
-            self.info_df.loc[idx, "adequate_confidence_score"] = self.focus_regions_dct[
-                idx
-            ].adequate_confidence_score
+            # update the info_df with the confidence scores
+            for idx in self.focus_regions_dct:
+                self.info_df.loc[idx, "adequate_confidence_score"] = (
+                    self.focus_regions_dct[idx].adequate_confidence_score
+                )
+
+        else:
+            for idx in self.focus_regions_dct:
+                self.info_df.loc[idx, "adequate_confidence_score"] = 1
 
     def get_top_n_focus_regions(self, n=None):
         """Return the top n focus regions with the highest confidence scores.
