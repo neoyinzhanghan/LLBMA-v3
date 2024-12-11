@@ -16,7 +16,7 @@ from ultralytics import YOLO
 
 # Within package imports ###########################################################################
 from LLBMA.resources.BMAassumptions import *
-from LLBMA.brain.metrics import bb_intersection_over_union
+from LLBMA.brain.metrics import bb_intersection_over_union_fixed_dims
 from LLBMA.vision.processing import zero_pad
 from LLBMA.WBCCandidate import WBCCandidate
 from LLBMA.vision.image_quality import VoL
@@ -32,7 +32,7 @@ def _remove_wbc_df_duplicates(df):
 
         found_duplicate = False
         for j in range(len(filtered_df)):
-            iou = bb_intersection_over_union(
+            iou = bb_intersection_over_union_fixed_dims(
                 df.iloc[i][["TL_x", "TL_y", "BR_x", "BR_y"]],
                 filtered_df.iloc[j][["TL_x", "TL_y", "BR_x", "BR_y"]],
             )
