@@ -24,28 +24,64 @@ from LLBMA.brain.utils import *
 
 
 def _remove_wbc_df_duplicates(df):
-    """Remove duplicate WBCs from the df, in place, return None."""
-    i = 0
+    filtered_df = pd.DataFrame(
+        columns=["TL_x", "TL_y", "BR_x", "BR_y", "confidence", "class"]
+    )
 
-    while i < len(df):
-        j = i + 1
-        while j < len(df):
+    for i in range(len(df)):
+
+        found_duplicate = False
+        for j in range(len(filtered_df)):
             iou = bb_intersection_over_union(
                 df.iloc[i][["TL_x", "TL_y", "BR_x", "BR_y"]],
-                df.iloc[j][["TL_x", "TL_y", "BR_x", "BR_y"]],
+                filtered_df.iloc[j][["TL_x", "TL_y", "BR_x", "BR_y"]],
             )
             if iou > 0.5:
-                if df.iloc[i]["confidence"] > df.iloc[j]["confidence"]:
-                    df = df.drop(df.index[j])
-                    df.reset_index(drop=True, inplace=True)
-                else:
-                    df = df.drop(df.index[i])
-                    df.reset_index(drop=True, inplace=True)
-                    break
-            else:
-                j += 1
-        if j == len(df):
-            i += 1
+                if df.iloc[i]["confidence"] > filtered_df.iloc[j]["confidence"]:
+                    # then replace the jth row of filtered_df with the ith row of df
+                    filtered_df.iloc[j] = df.iloc[i]
+
+                found_duplicate = True
+                break
+
+        if not found_duplicate:
+            # add the ith row of df to filtered_df
+            filtered_df = pd.concat(
+                [
+                    filtered_df,
+                    pd.DataFrame(
+                        [df.iloc[i]],
+                        columns=["TL_x", "TL_y", "BR_x", "BR_y", "confidence", "class"],
+                    ),
+                ]
+            )
+
+    return filtered_df
+
+
+# def _remove_wbc_df_duplicates(df):  # TODO -- bad algorithm here -- need to fix
+#     """Remove duplicate WBCs from the df, in place, return None."""
+#     i = 0
+
+#     while i < len(df):
+#         j = i + 1
+#         while j < len(df):
+#             iou = bb_intersection_over_union(
+#                 df.iloc[i][["TL_x", "TL_y", "BR_x", "BR_y"]],
+#                 df.iloc[j][["TL_x", "TL_y", "BR_x", "BR_y"]],
+#             )
+#             if iou > 0.5:
+#                 if df.iloc[i]["confidence"] > df.iloc[j]["confidence"]:
+#                     df = df.drop(df.index[j])
+#                     df.reset_index(drop=True, inplace=True)
+#                 else:
+#                     df = df.drop(df.index[i])
+#                     df.reset_index(drop=True, inplace=True)
+#                     break
+#             else:
+#                 j += 1
+#         if j == len(df):
+#             i += 1
 
 
 def YOLO_detect(model, image, conf_thres, verbose=False):
