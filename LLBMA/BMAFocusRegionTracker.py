@@ -149,8 +149,11 @@ class FocusRegionsTracker:
                 )
 
         else:
-            for idx in self.focus_regions_dct:
-                self.info_df.loc[idx, "adequate_confidence_score"] = 1
+            # assign number 2 to the confidence score of the focus regions
+            self.info_df["adequate_confidence_score"] = 2
+
+            for key in self.focus_regions_dct:
+                self.focus_regions_dct[key].adequate_confidence_score = 2
 
     def get_top_n_focus_regions(self, n=None):
         """Return the top n focus regions with the highest confidence scores.

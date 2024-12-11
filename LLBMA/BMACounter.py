@@ -82,6 +82,7 @@ class BMACounter:
         error: bool = False,
         pretiled_h5_path: str = None,
         keep_h5: bool = True,
+        run_low_mag: bool = False,
     ):
         """Initialize a BMACounter object."""
         start_time = time.time()
@@ -100,6 +101,7 @@ class BMACounter:
         self.keep_h5 = keep_h5
         self.h5_path = None
         self.pretiled_h5_path = pretiled_h5_path
+        self.run_low_mag = run_low_mag
 
         # The focus regions and WBC candidates are None until they are processed
         self.focus_regions = None
@@ -428,7 +430,7 @@ class BMACounter:
     def filter_focus_regions(self):
         start_time = time.time()
 
-        fr_tracker = FocusRegionsTracker(self.focus_regions)
+        fr_tracker = FocusRegionsTracker(self.focus_regions, self.run_low_mag)
 
         self.fr_tracker = fr_tracker
 
