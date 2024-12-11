@@ -265,7 +265,9 @@ class WSICropManagerWithFRCreation:
             indices_to_jpeg.append(indices_level_jpeg)
 
             if wsi_level == 0 and self.topview.is_in_mask(focus_region_coord):
-                print("Focus region is in mask") # TODO remove this line it is for debugging
+                print(
+                    "Focus region is in mask"
+                )  # TODO remove this line it is for debugging
                 # if image is not a square, skip it
                 if (
                     focus_region_coord[2] - focus_region_coord[0]
@@ -347,13 +349,13 @@ def crop_wsi_images_all_levels(
 
                 for done_id in done_ids:
                     try:
-                        batch, focus_regions = ray.get(done_id)
+                        batch, new_focus_regions = ray.get(done_id)
                         for indices_jpeg in batch:
                             x, y, wsi_level, jpeg_string = indices_jpeg
                             level = int(18 - wsi_level)
                             f[str(level)][x, y] = jpeg_string
 
-                        focus_regions.extend(focus_regions)
+                        focus_regions.extend(new_focus_regions)
 
                         pbar.update(len(batch))
 
