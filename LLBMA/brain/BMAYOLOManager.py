@@ -46,15 +46,29 @@ def _remove_wbc_df_duplicates(df):
 
         if not found_duplicate:
             # add the ith row of df to filtered_df
-            filtered_df = pd.concat(
-                [
-                    filtered_df,
-                    pd.DataFrame(
-                        [df.iloc[i]],
-                        columns=["TL_x", "TL_y", "BR_x", "BR_y", "confidence", "class"],
-                    ),
-                ]
-            )
+
+            if filtered_df.empty:
+                filtered_df = pd.DataFrame(
+                    [df.iloc[i]],
+                    columns=["TL_x", "TL_y", "BR_x", "BR_y", "confidence", "class"],
+                )
+            else:
+                filtered_df = pd.concat(
+                    [
+                        filtered_df,
+                        pd.DataFrame(
+                            [df.iloc[i]],
+                            columns=[
+                                "TL_x",
+                                "TL_y",
+                                "BR_x",
+                                "BR_y",
+                                "confidence",
+                                "class",
+                            ],
+                        ),
+                    ]
+                )
 
     return filtered_df
 
