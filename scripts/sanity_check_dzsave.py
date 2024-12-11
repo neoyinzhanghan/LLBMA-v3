@@ -18,4 +18,9 @@ with h5py.File(dzsave_h5_path, "r") as f:
     print(dataset.shape)
 
     # print the the [0,0] element of the dataset
-    print(dataset[3, 1])
+    # print(dataset[3, 1])
+
+tile = retrieve_tile_h5(dzsave_h5_path, 11, 3, 1)
+
+print(type(tile))
+print(tile.shape)
