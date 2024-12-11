@@ -12,7 +12,7 @@ with h5py.File(dzsave_h5_path, "r") as f:
         print(f"{key}: {f[key].shape}")
 
     # get the "0" dataset
-    dataset = f["3"]
+    dataset = f["11"]
 
     # print the dimensions of the dataset
     print(dataset.shape)
