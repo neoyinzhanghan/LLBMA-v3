@@ -22,5 +22,8 @@ with h5py.File(dzsave_h5_path, "r") as f:
 
 tile = retrieve_tile_h5(dzsave_h5_path, 11, 3, 1)
 
-print(type(tile)) # should be a PIL.JpegImagePlugin.JpegImageFile
-print(tile.size) # should be (256, 256)F
+print(type(tile))  # should be a PIL.JpegImagePlugin.JpegImageFile
+print(tile.size)  # should be (256, 256)F
+
+# save the image to a file at "/media/hdd3/neo/test_error_results_dir_tmp/test_slide/test_image.jpg"
+tile.save("/media/hdd3/neo/test_error_results_dir_tmp/test_slide/test_image.jpg")
