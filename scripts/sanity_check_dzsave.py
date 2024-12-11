@@ -18,4 +18,4 @@ with h5py.File(dzsave_h5_path, "r") as f:
     print(dataset.shape)
 
     # print the the [0,0] element of the dataset
-    print(dataset[0, 0])
+    print(dataset[3, 1])
