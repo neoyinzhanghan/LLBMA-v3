@@ -1117,7 +1117,7 @@ class BMACounter:
                 key for key in self.profiling_data.keys() if "hoarding" in key
             ]
 
-            self.profiling_data["total_hoarding_time"] = sum(
+            self.profiling_data["hoarding_time"] = sum(
                 [self.profiling_data[key] for key in lst_of_hoarding_time_keys]
             )
 
