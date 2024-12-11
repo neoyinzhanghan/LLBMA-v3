@@ -323,7 +323,8 @@ def crop_wsi_images_all_levels(
     )
 
     task_managers = [
-        WSICropManagerWithFRCreation.remote(wsi_path) for _ in range(num_croppers)
+        WSICropManagerWithFRCreation.remote(wsi_path, topview)
+        for _ in range(num_croppers)
     ]
 
     tasks = {}
