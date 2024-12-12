@@ -307,14 +307,6 @@ class BMACounter:
 
             self.focus_regions = focus_regions
 
-            print(type(self.focus_regions))
-            print(f"Focus regions: {len(self.focus_regions)}")
-
-            import sys  
-            sys.exit()
-
-
-
         self.h5_path = dzsave_path
 
         self.profiling_data["dzsave_time"] = time.time() - start_time
