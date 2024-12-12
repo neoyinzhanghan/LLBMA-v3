@@ -1087,7 +1087,11 @@ class BMACounter:
 
             self.dzsave_slide()
 
-            if self.focus_regions is None:
+            if self.focus_regions is None and self.pretiled_h5_path is not None:
+                self.find_focus_regions()
+                self.filter_focus_regions()
+
+            if self.pretiled_h5_path is None:
                 self.find_focus_regions()
                 self.filter_focus_regions()
 
