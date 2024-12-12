@@ -173,9 +173,9 @@ def YOLO_detect(model, image, conf_thres, verbose=False):
         plt.show()
 
     # go through the df to remove duplicates, if two bounding boxes have iou > 0.5, then remove the one with lower confidence
-    _remove_wbc_df_duplicates(df)
+    cleaned_df = _remove_wbc_df_duplicates(df)
 
-    return df
+    return cleaned_df
 
 
 # @ray.remote(num_gpus=num_gpus_per_manager, num_cpus=num_cpus_per_manager)
