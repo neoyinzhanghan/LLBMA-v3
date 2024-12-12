@@ -282,8 +282,15 @@ class WSICropManagerWithFRCreation:
                     )
                 )
 
+                downsampled_coord = (
+                    focus_region_coord[0] // (2**search_view_level),
+                    focus_region_coord[1] // (2**search_view_level),
+                    focus_region_coord[2] // (2**search_view_level),
+                    focus_region_coord[3] // (2**search_view_level),
+                )
+
                 focus_region = FocusRegion(
-                    downsampled_coordinate=focus_region_coord,
+                    downsampled_coordinate=downsampled_coord,
                     downsampled_image=downsampled_image,
                 )
 

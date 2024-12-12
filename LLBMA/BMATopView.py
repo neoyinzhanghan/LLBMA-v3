@@ -133,7 +133,9 @@ class TopView:
         return True
 
     def is_in_mask(self, coordinate):
-        """Return True iff the coordinate is within the mask area."""
+        """Return True iff the coordinate is within the mask area.
+        The input coordinate needs to be the level 0 coordinate.
+        """
 
         if self.binary_mask_np is None:
             # make sure to get a cv2 format of the mask as a binary numpy array
@@ -146,8 +148,7 @@ class TopView:
 
         # Adjust coordinates by downsampling factor
         TL_x_adj, TL_y_adj, BR_x_adj, BR_y_adj = [
-            int(coord / (topview_downsampling_factor // search_view_downsample_rate))
-            for coord in coordinate
+            int(coord / topview_downsampling_factor) for coord in coordinate
         ]
 
         # Check if the box is within the mask area
