@@ -320,12 +320,10 @@ class BMACounter:
 
     def find_focus_regions(self):
         """Return the focus regions of the highest magnification view."""
-
+        os.makedirs(os.path.join(self.save_dir, "focus_regions"), exist_ok=True)
         start_time = time.time()
 
         if self.pretiled_h5_path is not None:
-
-            os.makedirs(os.path.join(self.save_dir, "focus_regions"), exist_ok=True)
 
             # First get a list of the focus regions coordinates based on focus_regions_size at highest level of magnification
             # if the dimension is not divisible by the focus_regions_size, then we simply omit the last focus region
