@@ -83,8 +83,8 @@ class FocusRegion:
         self.wbc_candidates = None
         self.YOLO_df = None
 
-        VoL_high_mag = None
-        adequate_confidence_score_high_mag = None
+        self.VoL_high_mag = None
+        self.adequate_confidence_score_high_mag = None
 
     def get_image(self, image):
         """Update the image of the focus region."""
