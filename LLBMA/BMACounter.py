@@ -1203,7 +1203,6 @@ class BMACounter:
             else:
                 raise e
 
-
 class NoCellFoundError(ValueError):
     """An exception raised when no cell is found."""
 
