@@ -1,7 +1,28 @@
 import streamlit as st
 import h5py
 import numpy as np
-from LLBMA.tiling.dzsave_h5 import retrieve_tile_h5 
+from flask import Flask, send_file, request
+from LLBMA.tiling.dzsave_h5 import retrieve_tile_h5
+
+app = Flask(__name__)
+
+
+@app.route("/tile_api", methods=["GET"])
+def tile_api():
+    slide = request.args.get("slide")
+    level = int(request.args.get("level"))
+    row = int(request.args.get("x"))  # Note: x corresponds to row
+    col = int(request.args.get("y"))  # Note: y corresponds to col
+
+    tile = retrieve_tile_h5(slide, level, row, col)
+    # Return the tile as an image
+    tile_img_path = "/tmp/tile_img.png"  # Temporary path
+    from PIL import Image
+
+    img = Image.fromarray(tile)
+    img.save(tile_img_path)
+    return send_file(tile_img_path, mimetype="image/png")
+
 
 # List of slide H5 paths
 slide_h5_paths = [
@@ -18,8 +39,13 @@ selected_slide = st.selectbox("Select a slide:", slide_h5_paths, index=0)
 if selected_slide:
     st.write(f"Displaying: {selected_slide}")
 
+    # Get width and height from the H5 file
+    with h5py.File(selected_slide, "r") as f:
+        height = int(f["level_0_height"][()])
+        width = int(f["level_0_width"][()])
+
     # Embed OpenSeadragon viewer
-    viewer_html = f'''
+    viewer_html = f"""
     <div id="openseadragon1" style="width: 100%; height: 500px;"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/2.4.2/openseadragon.min.js"></script>
     <script>
@@ -33,12 +59,12 @@ if selected_slide:
                 id: "openseadragon1",
                 prefixUrl: "https://cdnjs.cloudflare.com/ajax/libs/openseadragon/2.4.2/images/",
                 tileSources: {{
-                    width: 10000, // Example width, replace with actual
-                    height: 10000, // Example height, replace with actual
-                    tileSize: 256,
+                    width: {width},
+                    height: {height},
+                    tileSize: 512,
                     maxLevel: 18,
                     getTileUrl: function(level, x, y) {{
-                        return `/tile_api?slide={selected_slide}&level=${{level}}&x=${{x}}&y=${{y}}`;
+                        return `/tile_api?slide=${{encodeURIComponent(selected_slide)}}&level=${{level}}&x=${{x}}&y=${{y}}`;
                     }}
                 }},
                 showNavigator: true
@@ -70,5 +96,8 @@ if selected_slide:
 
         document.addEventListener('DOMContentLoaded', initializeViewer);
     </script>
-    '''
+    """
     st.components.v1.html(viewer_html, height=550)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
