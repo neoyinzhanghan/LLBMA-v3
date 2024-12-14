@@ -1,9 +1,11 @@
+import io
 import h5py
 import numpy as np
 from flask import Flask, send_file, request, render_template_string
 from LLBMA.tiling.dzsave_h5 import retrieve_tile_h5
 
 app = Flask(__name__)
+
 
 # Function to get dimensions from H5 file
 def get_dimensions(h5_path):
@@ -12,6 +14,7 @@ def get_dimensions(h5_path):
         width = int(f["level_0_width"][()])
     return width, height
 
+
 @app.route("/tile_api", methods=["GET"])
 def tile_api():
     slide = request.args.get("slide")
@@ -19,8 +22,13 @@ def tile_api():
     row = int(request.args.get("x"))  # Note: x corresponds to row
     col = int(request.args.get("y"))  # Note: y corresponds to col
 
-    tile = retrieve_tile_h5(slide, level, row, col)
-    return tile
+    tile = retrieve_tile_h5(slide, level, row, col)  # Retrieve the JPEG image file
+    # Create an in-memory bytes buffer to serve the image directly
+    img_io = io.BytesIO()
+    tile.save(img_io, format="JPEG")
+    img_io.seek(0)
+    return send_file(img_io, mimetype="image/jpeg")
+
 
 @app.route("/", methods=["GET"])
 def index():
@@ -31,9 +39,11 @@ def index():
         "/media/hdd3/neo/results_dir/BMA-diff_2024-12-12 13:55:39/slide.h5",
     ]
 
-    slide_options = "".join([f'<option value="{slide}">{slide}</option>' for slide in slide_h5_paths])
+    slide_options = "".join(
+        [f'<option value="{slide}">{slide}</option>' for slide in slide_h5_paths]
+    )
 
-    template = f'''
+    template = f"""
     <!DOCTYPE html>
     <html>
     <head>
@@ -106,14 +116,16 @@ def index():
         </script>
     </body>
     </html>
-    '''
+    """
     return render_template_string(template)
+
 
 @app.route("/get_dimensions", methods=["GET"])
 def get_dimensions_api():
     slide = request.args.get("slide")
     width, height = get_dimensions(slide)
     return {"width": width, "height": height}
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
