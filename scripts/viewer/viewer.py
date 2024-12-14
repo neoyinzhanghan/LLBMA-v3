@@ -16,7 +16,7 @@ def retrieve_tile_h5(h5_path, level, row, col):
 # List of slide H5 paths
 slide_h5_paths = [
     "/media/hdd3/neo/results_dir/BMA-diff_2024-12-12 12:52:31/slide.h5",
-    "/media/hdd3/neo/results_dir/BMA-diff_2024-12-12 12:59:45/slide.txt",
+    "/media/hdd3/neo/results_dir/BMA-diff_2024-12-12 12:59:45/slide.h5",
     "/media/hdd3/neo/results_dir/BMA-diff_2024-12-12 13:55:39/slide.h5",
 ]
 
