@@ -1,7 +1,6 @@
 import os
 import io
 import h5py
-import numpy as np
 from flask import Flask, send_file, request, render_template_string
 from LLBMA.tiling.dzsave_h5 import retrieve_tile_h5
 
@@ -45,14 +44,14 @@ def index():
                 slide_h5_paths.append(os.path.join(root, "slide.h5"))
 
     slide_options = "".join(
-        [f'<option value="{slide}">📂 {slide}</option>' for slide in slide_h5_paths]
+        [f'<option value="{slide}">🌸 {slide}</option>' for slide in slide_h5_paths]
     )
 
     template = f"""
     <!DOCTYPE html>
     <html>
     <head>
-        <title>H5 Slide Viewer</title>
+        <title>🌺 H5 Slide Viewer 🌺</title>
         <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/2.4.2/openseadragon.min.js"></script>
         <style>
@@ -60,42 +59,59 @@ def index():
                 font-family: 'Roboto', sans-serif;
                 margin: 0;
                 padding: 0;
+                background-color: #1b1b1b;
+                color: white;
                 transition: background-color 0.3s, color 0.3s;
             }}
 
             .header {{
                 text-align: center;
                 padding: 20px;
-                background-color: #FFB6C1;
-                color: #fff;
+                background: linear-gradient(to right, #ff7eb3, #ff758c);
+                color: white;
                 font-family: 'Pacifico', cursive;
+                font-size: 24px;
+                border-bottom: 2px solid #fff;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
             }}
 
             .theme-toggle {{
                 position: fixed;
                 top: 10px;
                 right: 10px;
-                background: #FF69B4;
+                background: #ff69b4;
                 border: none;
                 border-radius: 20px;
                 color: white;
                 padding: 10px 20px;
                 cursor: pointer;
                 font-size: 16px;
+                transition: background-color 0.3s;
+            }}
+
+            .theme-toggle:hover {{
+                background: #ff4582;
             }}
 
             .search-container {{
                 text-align: center;
-                margin: 20px;
+                margin: 30px auto;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
             }}
 
             .search-bar {{
                 padding: 10px;
                 font-size: 16px;
                 border-radius: 5px;
-                border: 2px solid #FF69B4;
+                border: 2px solid #ff69b4;
+                background: #292929;
+                color: white;
                 width: 90%;
                 max-width: 500px;
+                margin-bottom: 20px;
             }}
 
             select {{
@@ -104,56 +120,48 @@ def index():
                 padding: 10px;
                 font-size: 16px;
                 border-radius: 5px;
-                border: 2px solid #FF69B4;
-                background: #fff;
-                color: #333;
+                border: 2px solid #ff69b4;
+                background: #292929;
+                color: white;
                 width: 90%;
                 max-width: 500px;
+                text-align: center;
+            }}
+
+            select option {{
+                background-color: #1b1b1b;
+                color: white;
+                padding: 5px;
+                border: none;
+                transition: all 0.3s;
             }}
 
             #openseadragon1 {{
                 width: 100%;
                 height: 500px;
-                border: 5px solid #FF69B4;
+                border: 5px solid #ff69b4;
                 border-radius: 10px;
-            }}
-
-            .dark-theme {{
-                background-color: #2C2C2C;
-                color: white;
-            }}
-
-            .dark-theme .search-bar {{
-                background-color: #444;
-                color: white;
-                border-color: #FF69B4;
-            }}
-
-            .dark-theme select {{
-                background-color: #444;
-                color: white;
-                border-color: #FF69B4;
             }}
         </style>
     </head>
     <body>
-        <div class="header">✨ Welcome to the H5 Slide Viewer ✨</div>
+        <div class="header">🌷✨ Welcome to the H5 Slide Viewer ✨🌷</div>
         <button class="theme-toggle" onclick="toggleTheme()">🌞 Switch to Dark Theme</button>
         <div class="search-container">
-            <input type="text" id="searchBar" class="search-bar" placeholder="🔍 Search for a slide..." oninput="filterSlides()">
+            <input type="text" id="searchBar" class="search-bar" placeholder="🌼 Search for a slide..." oninput="filterSlides()">
+            <select id="slide" onchange="initializeViewer()">
+                {slide_options}
+            </select>
         </div>
-        <label for="slide">🎀 Select a slide:</label>
-        <select id="slide" onchange="initializeViewer()">
-            {slide_options}
-        </select>
         <div id="openseadragon1"></div>
         <script>
             let viewer;
-            let isDarkTheme = false;
+            let isDarkTheme = true;
 
             function toggleTheme() {{
                 isDarkTheme = !isDarkTheme;
-                document.body.classList.toggle('dark-theme', isDarkTheme);
+                document.body.style.backgroundColor = isDarkTheme ? "#1b1b1b" : "#ffffff";
+                document.body.style.color = isDarkTheme ? "white" : "black";
                 document.querySelector('.theme-toggle').textContent = isDarkTheme ? '🌙 Switch to Light Theme' : '🌞 Switch to Dark Theme';
             }}
 
