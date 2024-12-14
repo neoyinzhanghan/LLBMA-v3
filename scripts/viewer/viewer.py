@@ -118,19 +118,6 @@ def index():
                 border-radius: 10px;
             }}
 
-            .zoom-display {{
-                position: absolute;
-                bottom: 10px;
-                right: 10px;
-                background: rgba(255, 105, 180, 0.8);
-                color: white;
-                padding: 10px;
-                border-radius: 10px;
-                font-family: 'Roboto', sans-serif;
-                font-size: 14px;
-                z-index: 9999;
-            }}
-
             .dark-theme {{
                 background-color: #2C2C2C;
                 color: white;
@@ -207,18 +194,6 @@ def index():
                             }},
                             showNavigator: true
                         }});
-
-                        const zoomDisplay = document.createElement('div');
-                        zoomDisplay.className = 'zoom-display';
-                        document.body.appendChild(zoomDisplay);
-
-                        function updateZoomDisplay() {{
-                            const zoom = viewer.viewport.getZoom(true);
-                            zoomDisplay.textContent = `Zoom: ${zoom.toFixed(2)}x`;
-                        }}
-
-                        viewer.addHandler('zoom', updateZoomDisplay);
-                        updateZoomDisplay();
                     }});
             }}
 
