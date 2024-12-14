@@ -26,7 +26,7 @@ if __name__ == "__main__":
         dump_dir=dump_dir,
         hoarding=True,
         extra_hoarding=False,
-        continue_on_error=False,
+        continue_on_error=True,
         do_extract_features=False,
         check_specimen_clf=False,
         pretiled_h5_path=pretiled_h5_path,
