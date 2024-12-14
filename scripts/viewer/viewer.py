@@ -20,13 +20,7 @@ def tile_api():
     col = int(request.args.get("y"))  # Note: y corresponds to col
 
     tile = retrieve_tile_h5(slide, level, row, col)
-    # Return the tile as an image
-    tile_img_path = "/tmp/tile_img.png"  # Temporary path
-    from PIL import Image
-
-    img = Image.fromarray(tile)
-    img.save(tile_img_path)
-    return send_file(tile_img_path, mimetype="image/png")
+    return tile
 
 @app.route("/", methods=["GET"])
 def index():
