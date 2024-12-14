@@ -1,17 +1,7 @@
 import streamlit as st
-from streamlit_openseadragon import StreamlitOpenSeadragon
 import h5py
 import numpy as np
-
-
-# Function to retrieve tile from H5 file
-def retrieve_tile_h5(h5_path, level, row, col):
-    with h5py.File(h5_path, "r") as h5_file:
-        level_group = h5_file[f"level_{level}"]
-        tile_dataset = level_group[f"row_{row}"][f"col_{col}"]
-        tile = np.array(tile_dataset)
-    return tile
-
+from LLBMA.tiling.dzsave_h5 import retrieve_tile_h5 
 
 # List of slide H5 paths
 slide_h5_paths = [
@@ -28,17 +18,57 @@ selected_slide = st.selectbox("Select a slide:", slide_h5_paths, index=0)
 if selected_slide:
     st.write(f"Displaying: {selected_slide}")
 
-    # Function to serve tiles dynamically for OpenSeadragon
-    def tile_callback(level, x, y):
-        try:
-            tile = retrieve_tile_h5(selected_slide, level, y, x)
-            return tile
-        except KeyError:
-            return None
+    # Embed OpenSeadragon viewer
+    viewer_html = f'''
+    <div id="openseadragon1" style="width: 100%; height: 500px;"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/2.4.2/openseadragon.min.js"></script>
+    <script>
+        var viewer;
+        function initializeViewer() {{
+            if (viewer) {{
+                viewer.destroy();
+            }}
 
-    # Display the OpenSeadragon viewer
-    StreamlitOpenSeadragon(
-        tile_callback=tile_callback,
-        max_zoom=5,  # Example: adjust based on your H5 tile levels
-        tile_size=256,  # Ensure this matches your H5 file's tile size
-    )
+            viewer = OpenSeadragon({{
+                id: "openseadragon1",
+                prefixUrl: "https://cdnjs.cloudflare.com/ajax/libs/openseadragon/2.4.2/images/",
+                tileSources: {{
+                    width: 10000, // Example width, replace with actual
+                    height: 10000, // Example height, replace with actual
+                    tileSize: 256,
+                    maxLevel: 18,
+                    getTileUrl: function(level, x, y) {{
+                        return `/tile_api?slide={selected_slide}&level=${{level}}&x=${{x}}&y=${{y}}`;
+                    }}
+                }},
+                showNavigator: true
+            }});
+
+            var zoomDisplay = document.createElement('div');
+            zoomDisplay.id = 'zoomDisplay';
+            zoomDisplay.style.position = 'absolute';
+            zoomDisplay.style.bottom = '10px';
+            zoomDisplay.style.right = '10px';
+            zoomDisplay.style.background = 'rgba(0, 0, 0, 0.5)';
+            zoomDisplay.style.color = 'white';
+            zoomDisplay.style.padding = '5px';
+            zoomDisplay.style.borderRadius = '5px';
+            zoomDisplay.style.fontFamily = 'Arial, sans-serif';
+            zoomDisplay.style.fontSize = '14px';
+            zoomDisplay.style.zIndex = '9999';
+
+            viewer.container.appendChild(zoomDisplay);
+
+            function updateZoomDisplay() {{
+                var zoom = viewer.viewport.getZoom(true);
+                zoomDisplay.textContent = 'Zoom: ' + zoom.toFixed(2) + 'x';
+            }}
+
+            viewer.addHandler('zoom', updateZoomDisplay);
+            updateZoomDisplay();
+        }}
+
+        document.addEventListener('DOMContentLoaded', initializeViewer);
+    </script>
+    '''
+    st.components.v1.html(viewer_html, height=550)
