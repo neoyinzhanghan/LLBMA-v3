@@ -1,6 +1,7 @@
 #################
 ### Logistics ###
 #################
+import albumentations as A
 
 ############################
 ### WSI Image Parameters ###
@@ -122,9 +123,6 @@ high_mag_region_clf_threshold = 0.25
 ###########################
 ### Augmentation Config ###
 ###########################
-
-import albumentations as A
-
 
 def get_feat_extract_augmentation_pipeline(image_size):
     """Returns a randomly chosen augmentation pipeline for SSL."""
