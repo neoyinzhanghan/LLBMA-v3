@@ -435,8 +435,10 @@ class FocusRegionsTracker:
             BR_y_adj = int(BR_y / topview_downsampling_factor)
 
             # Calculate color based on confidence_score, red for 0, green for 1
-            red_intensity = min((1 - confidence_score) * 255, 225)
-            green_intensity = min(confidence_score * 255, 225) # we need to clamp the value by 225
+            red_intensity = max(min((1 - confidence_score) * 255, 225), 0)
+            green_intensity = max(
+                min(confidence_score * 255, 225), 0
+            )  # we need to clamp the value by 225
             color = [0, green_intensity, red_intensity]  # BGR format for OpenCV
 
             # Assign the color to the corresponding region in the heatmap
