@@ -1,3 +1,4 @@
+import os
 import io
 import h5py
 import numpy as np
@@ -32,12 +33,23 @@ def tile_api():
 
 @app.route("/", methods=["GET"])
 def index():
-    # List of slide H5 paths
-    slide_h5_paths = [
-        "/media/hdd3/neo/results_dir/BMA-diff_2024-12-12 12:52:31/slide.h5",
-        "/media/hdd3/neo/results_dir/BMA-diff_2024-12-12 12:59:45/slide.h5",
-        "/media/hdd3/neo/results_dir/BMA-diff_2024-12-12 13:55:39/slide.h5",
+
+    root_dir = "/media/hdd3/neo/results_dir"
+
+    # find all the subdirectories in the root directory
+    subdirs = [
+        os.path.join(root_dir, name)
+        for name in os.listdir(root_dir)
+        if os.path.isdir(os.path.join(root_dir, name))
     ]
+
+    # only keep the subdirectories that contain a slide.h5 file
+    slide_h5_paths = []
+
+    for subdir in subdirs:
+        for root, dirs, files in os.walk(subdir):
+            if "slide.h5" in files:
+                slide_h5_paths.append(os.path.join(root, "slide.h5"))
 
     slide_options = "".join(
         [f'<option value="{slide}">{slide}</option>' for slide in slide_h5_paths]
