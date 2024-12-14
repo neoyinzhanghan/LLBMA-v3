@@ -93,29 +93,8 @@ def index():
                 background: #ff4582;
             }}
 
-            .search-container {{
-                text-align: center;
-                margin: 30px auto;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                flex-direction: column;
-            }}
-
-            .search-bar {{
-                padding: 10px;
-                font-size: 16px;
-                border-radius: 5px;
-                border: 2px solid #ff69b4;
-                background: #292929;
-                color: white;
-                width: 90%;
-                max-width: 500px;
-                margin-bottom: 20px;
-            }}
-
             select {{
-                margin: 20px auto;
+                margin: 40px auto;
                 display: block;
                 padding: 10px;
                 font-size: 16px;
@@ -147,12 +126,10 @@ def index():
     <body>
         <div class="header">🌷✨ Welcome to the H5 Slide Viewer ✨🌷</div>
         <button class="theme-toggle" onclick="toggleTheme()">🌞 Switch to Dark Theme</button>
-        <div class="search-container">
-            <input type="text" id="searchBar" class="search-bar" placeholder="🌼 Search for a slide..." oninput="filterSlides()">
-            <select id="slide" onchange="initializeViewer()">
-                {slide_options}
-            </select>
-        </div>
+        <label for="slide" style="text-align: center; display: block; font-size: 18px; margin-top: 20px;">🎀 Select a Slide:</label>
+        <select id="slide" onchange="initializeViewer()">
+            {slide_options}
+        </select>
         <div id="openseadragon1"></div>
         <script>
             let viewer;
@@ -163,17 +140,6 @@ def index():
                 document.body.style.backgroundColor = isDarkTheme ? "#1b1b1b" : "#ffffff";
                 document.body.style.color = isDarkTheme ? "white" : "black";
                 document.querySelector('.theme-toggle').textContent = isDarkTheme ? '🌙 Switch to Light Theme' : '🌞 Switch to Dark Theme';
-            }}
-
-            function filterSlides() {{
-                const searchInput = document.getElementById('searchBar').value.toLowerCase();
-                const slideSelect = document.getElementById('slide');
-                const options = slideSelect.options;
-
-                for (let i = 0; i < options.length; i++) {{
-                    const slideName = options[i].textContent.toLowerCase();
-                    options[i].style.display = slideName.includes(searchInput) ? 'block' : 'none';
-                }}
             }}
 
             function initializeViewer() {{
