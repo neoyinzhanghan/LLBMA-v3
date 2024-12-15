@@ -260,7 +260,6 @@ def index():
                             showNavigator: true,
                             navigatorPosition: "BOTTOM_RIGHT",
                             minZoomLevel: 0.5,
-                            maxZoomLevel: 20
                         }});
 
                         document.getElementById('openseadragon1').classList.add('show');
