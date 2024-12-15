@@ -211,7 +211,7 @@ def index():
         </style>
     </head>
     <body>
-        <div class="header">Bone Marrow Aspirate and Peripheral Blood Smear Slide Viewer</div>
+        <div class="header"> BMA and PBS Slide Viewer</div>
         <button class="theme-toggle" onclick="toggleTheme()">🔆 Switch to Light Theme</button>
         <label for="slide" style="text-align: center; display: block; font-size: 18px; margin-top: 20px;"> Select a Slide:</label>
         <select id="slide" onchange="initializeViewer()">
