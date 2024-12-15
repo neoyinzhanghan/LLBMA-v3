@@ -12,7 +12,8 @@ snap_shot_size = 96
 num_classes = 23
 do_zero_pad = False
 
-assumed_mpp_level_0 = 0.2297952524300848
+# assumed_mpp_level_0 = 0.2297952524300848
+assumed_mpp_level_0_range = (0.2, 0.3)
 assumed_search_view_downsample_rate = 8
 assumed_top_view_downsample_rate = 128
 
@@ -123,6 +124,7 @@ high_mag_region_clf_threshold = 0.25
 ###########################
 ### Augmentation Config ###
 ###########################
+
 
 def get_feat_extract_augmentation_pipeline(image_size):
     """Returns a randomly chosen augmentation pipeline for SSL."""

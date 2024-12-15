@@ -2,7 +2,7 @@ import os
 import time
 from LLBMA.front_end.api import analyse_bma
 
-slide_path = "/media/hdd2/neo/tmp_slides_dir/test_slide.ndpi"
+slide_path = "/media/hdd2/neo/tmp_slides_dir/test_slide_2.ndpi"
 pretiled_h5_path = None
 dump_dir = "/media/hdd3/neo/test_error_results_dir_for_error"
 
