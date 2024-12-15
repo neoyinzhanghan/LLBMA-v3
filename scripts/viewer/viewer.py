@@ -57,94 +57,122 @@ def index():
     <!DOCTYPE html>
     <html>
     <head>
-        <title>🌺 H5 Slide Viewer 🌺</title>
-        <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+        <title>🩺 X-Themed H5 Slide Viewer</title>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/2.4.2/openseadragon.min.js"></script>
         <style>
             body {{
                 font-family: 'Roboto', sans-serif;
                 margin: 0;
                 padding: 0;
-                background-color: #1b1b1b;
-                color: white;
-                transition: background-color 0.3s, color 0.3s;
+                background-color: #0a1e34;
+                color: #d3e3f1;
+                transition: background-color 0.5s, color 0.5s;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
             }}
 
             .header {{
                 text-align: center;
                 padding: 20px;
-                background: linear-gradient(to right, #ff7eb3, #ff758c);
-                color: white;
-                font-family: 'Pacifico', cursive;
-                font-size: 24px;
-                border-bottom: 2px solid #fff;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+                background: linear-gradient(to right, #162b44, #0a1e34);
+                color: #00eaff;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 28px;
+                letter-spacing: 2px;
+                border-bottom: 3px solid #0e6ba8;
+                width: 100%;
+                box-shadow: 0 8px 15px rgba(0, 0, 0, 0.6);
             }}
 
             .theme-toggle {{
                 position: fixed;
-                top: 10px;
-                right: 10px;
-                background: #ff69b4;
-                border: none;
-                border-radius: 20px;
-                color: white;
-                padding: 10px 20px;
+                top: 15px;
+                right: 20px;
+                background: #003b66;
+                border: 2px solid #00eaff;
+                border-radius: 30px;
+                color: #d3e3f1;
+                padding: 10px 25px;
                 cursor: pointer;
-                font-size: 16px;
-                transition: background-color 0.3s;
+                font-size: 14px;
+                font-family: 'Roboto', sans-serif;
+                transition: background-color 0.3s, transform 0.2s;
             }}
 
             .theme-toggle:hover {{
-                background: #ff4582;
+                background: #00eaff;
+                color: #003b66;
+                transform: scale(1.05);
             }}
 
             select {{
                 margin: 40px auto;
                 display: block;
-                padding: 10px;
+                padding: 12px;
                 font-size: 16px;
-                border-radius: 5px;
-                border: 2px solid #ff69b4;
-                background: #292929;
-                color: white;
+                font-family: 'Roboto', sans-serif;
+                border-radius: 10px;
+                border: 2px solid #0e6ba8;
+                background: #0a1e34;
+                color: #d3e3f1;
                 width: 90%;
                 max-width: 500px;
                 text-align: center;
+                transition: border-color 0.3s;
             }}
 
-            select option {{
-                background-color: #1b1b1b;
-                color: white;
-                padding: 5px;
-                border: none;
-                transition: all 0.3s;
+            select:hover {{
+                border-color: #00eaff;
             }}
 
             #openseadragon1 {{
-                width: 100%;
-                height: 500px;
-                border: 5px solid #ff69b4;
-                border-radius: 10px;
+                width: 90%;
+                max-width: 1200px;
+                height: 600px;
+                border: 5px solid #0e6ba8;
+                border-radius: 15px;
+                margin-top: 30px;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
+            }}
+
+            .footer {{
+                margin-top: 20px;
+                font-size: 12px;
+                text-align: center;
+                color: #d3e3f1;
+            }}
+
+            .footer a {{
+                color: #00eaff;
+                text-decoration: none;
+            }}
+
+            .footer a:hover {{
+                text-decoration: underline;
             }}
         </style>
     </head>
     <body>
-        <div class="header">🌷✨ Welcome to the H5 Slide Viewer ✨🌷</div>
-        <button class="theme-toggle" onclick="toggleTheme()">🌞 Switch to Dark Theme</button>
-        <label for="slide" style="text-align: center; display: block; font-size: 18px; margin-top: 20px;">🎀 Select a Slide:</label>
+        <div class="header">🩺 Techno-Futurist H5 Slide Viewer</div>
+        <button class="theme-toggle" onclick="toggleTheme()">🌞 Switch to Light Theme</button>
+        <label for="slide" style="text-align: center; display: block; font-size: 18px; margin-top: 20px;">✨ Select a Slide:</label>
         <select id="slide" onchange="initializeViewer()">
             {slide_options}
         </select>
         <div id="openseadragon1"></div>
+
+        <div class="footer">Designed with ❤️ for precision medicine. <a href="#">Learn More</a></div>
+
         <script>
             let viewer;
             let isDarkTheme = true;
 
             function toggleTheme() {{
                 isDarkTheme = !isDarkTheme;
-                document.body.style.backgroundColor = isDarkTheme ? "#1b1b1b" : "#ffffff";
-                document.body.style.color = isDarkTheme ? "white" : "black";
+                document.body.style.backgroundColor = isDarkTheme ? "#0a1e34" : "#f0f0f0";
+                document.body.style.color = isDarkTheme ? "#d3e3f1" : "#333";
                 document.querySelector('.theme-toggle').textContent = isDarkTheme ? '🌙 Switch to Light Theme' : '🌞 Switch to Dark Theme';
             }}
 
@@ -172,16 +200,23 @@ def index():
                                     return `/tile_api?slide=${{encodeURIComponent(slide)}}&level=${{level}}&x=${{x}}&y=${{y}}`;
                                 }}
                             }},
-                            showNavigator: true
+                            showNavigator: true,
+                            navigatorPosition: "BOTTOM_RIGHT",
+                            minZoomLevel: 0.5,
+                            maxZoomLevel: 20
                         }});
                     }});
             }}
 
-            document.addEventListener('DOMContentLoaded', initializeViewer);
+            document.addEventListener('DOMContentLoaded', () => {{
+                // Add logic to populate slide options dynamically
+                // Example: Fetch slide options from server
+            }});
         </script>
     </body>
     </html>
     """
+
     return render_template_string(template)
 
 
