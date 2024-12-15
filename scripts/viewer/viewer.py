@@ -219,8 +219,6 @@ def index():
         </select>
         <div id="openseadragon1"></div>
 
-        <div class="footer">Designed with ❤️ for hematopathology. </div>
-
         <script>
             let viewer;
             let isDarkTheme = true;
