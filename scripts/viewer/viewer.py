@@ -6,12 +6,14 @@ from LLBMA.tiling.dzsave_h5 import retrieve_tile_h5
 
 app = Flask(__name__)
 
+
 # Function to get dimensions from H5 file
 def get_dimensions(h5_path):
     with h5py.File(h5_path, "r") as f:
         height = int(f["level_0_height"][()])
         width = int(f["level_0_width"][()])
     return width, height
+
 
 @app.route("/tile_api", methods=["GET"])
 def tile_api():
@@ -25,6 +27,7 @@ def tile_api():
     tile.save(img_io, format="JPEG")
     img_io.seek(0)
     return send_file(img_io, mimetype="image/jpeg")
+
 
 @app.route("/", methods=["GET"])
 def index():
@@ -42,6 +45,9 @@ def index():
         for root, dirs, files in os.walk(subdir):
             if "slide.h5" in files:
                 slide_h5_paths.append(os.path.join(root, "slide.h5"))
+
+    # Sort slide paths alphabetically
+    slide_h5_paths.sort()
 
     slide_options = "".join(
         [f'<option value="{slide}">🌸 {slide}</option>' for slide in slide_h5_paths]
@@ -178,11 +184,13 @@ def index():
     """
     return render_template_string(template)
 
+
 @app.route("/get_dimensions", methods=["GET"])
 def get_dimensions_api():
     slide = request.args.get("slide")
     width, height = get_dimensions(slide)
     return {"width": width, "height": height}
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
