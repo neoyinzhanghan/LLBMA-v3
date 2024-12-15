@@ -212,7 +212,7 @@ def index():
     </head>
     <body>
         <div class="header"> BMA and PBS Slide Viewer</div>
-        <button class="theme-toggle" onclick="toggleTheme()">🔆 Switch to Light Theme</button>
+        <button class="theme-toggle" onclick="toggleTheme()"> 🔆 Switch to Light Theme</button>
         <label for="slide" style="text-align: center; display: block; font-size: 18px; margin-top: 20px;"> Select a Slide:</label>
         <select id="slide" onchange="initializeViewer()">
             {slide_options}
@@ -229,7 +229,7 @@ def index():
             function toggleTheme() {{
                 isDarkTheme = !isDarkTheme;
                 document.body.className = isDarkTheme ? "" : "light-theme";
-                document.querySelector('.theme-toggle').textContent = isDarkTheme ? '🌙 Switch to Light Theme' : '🔆 Switch to Dark Theme';
+                document.querySelector('.theme-toggle').textContent = isDarkTheme ? '🔆 Switch to Light Theme' : '🌙 Switch to Dark Theme';
             }}
 
             // Initialize OpenSeadragon viewer
