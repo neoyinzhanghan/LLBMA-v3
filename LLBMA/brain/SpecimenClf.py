@@ -13,7 +13,7 @@ from LLBMA.resources.BMAassumptions import specimen_clf_checkpoint_path
 from LLBMA.resources.BMAassumptions import (
     topview_level,
     search_view_level,
-    assumed_mpp_level_0,
+    assumed_mpp_level_0_range,
     assumed_search_view_downsample_rate,
     assumed_top_view_downsample_rate,
 )
@@ -286,7 +286,6 @@ def check_slide_magnification_assumptions(wsi):
     Check that the level 0 mpp is equal to the assumed mpp level 0.
     Check the downsample factor of the search view and top view levels are equal to the assumed downsample rates.
     """
-    assumed_mpp_level_0_range = (0.2, 0.3)
     assert (
         float(wsi.properties.get("openslide.mpp-x", "Unknown"))
         > assumed_mpp_level_0_range[0]
