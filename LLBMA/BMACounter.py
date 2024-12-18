@@ -28,6 +28,7 @@ from LLBMA.vision.processing import SlideError, read_with_timeout
 from LLBMA.vision.BMAWSICropManager import WSIH5FocusRegionCreationManager
 from LLBMA.communication.write_config import *
 from LLBMA.communication.visualization import *
+from LLBMA.communication.sample_N_cells import sample_N_cells
 from LLBMA.brain.utils import *
 from LLBMA.brain.SpecimenClf import (
     get_specimen_type,
@@ -557,7 +558,7 @@ class BMACounter:
             self.focus_regions,
             key=lambda x: x.adequate_confidence_score_high_mag,
             reverse=True,
-        )
+        )  ## sort the focus regions by the confidence score SUPER IMPORTANT
 
         start_time = time.time()
 
@@ -1202,6 +1203,7 @@ class BMACounter:
 
             else:
                 raise e
+
 
 class NoCellFoundError(ValueError):
     """An exception raised when no cell is found."""
