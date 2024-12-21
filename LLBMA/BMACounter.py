@@ -41,6 +41,7 @@ from LLBMA.brain.BMAHighMagRegionCheckTracker import BMAHighMagRegionCheckTracke
 from LLBMA.resources.BMAassumptions import *
 from LLBMA.tiling.dzsave_h5_with_FR_creation import dzsave_h5_with_FR_creation
 from LLBMA.debug.hoarding import hoard_focus_regions_after_high_mag_scores_from_tracker
+from LLBMA.debug.count_cells import get_number_of_regions_and_cells
 
 
 class BMACounter:
@@ -1146,9 +1147,14 @@ class BMACounter:
                 os.path.join(self.save_dir, "runtime_data.csv"), header=False
             )
 
-        # except SpecimenError as e:
-        #     raise e
+            num_cells = get_number_of_regions_and_cells(self.save_dir)
 
+            if num_cells < min_num_good_cells:
+                raise TooFewCandidatesError(
+                    f"Too few good candidates found. min_num_good_cells {min_num_good_cells} is not reached by {num_cells} candidates. Decrease min_num_good_cells or check code and slide for error.
+                    If this error occurs it means that the minimum cell detection threshold is reached, but failed after removing cells that do not go into the differential."
+                )
+        
         except Exception as e:
             self.error = True
             if self.continue_on_error:
