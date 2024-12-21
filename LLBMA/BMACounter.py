@@ -1151,10 +1151,9 @@ class BMACounter:
 
             if num_cells < min_num_good_cells:
                 raise TooFewCandidatesError(
-                    f"Too few good candidates found. min_num_good_cells {min_num_good_cells} is not reached by {num_cells} candidates. Decrease min_num_good_cells or check code and slide for error.
-                    If this error occurs it means that the minimum cell detection threshold is reached, but failed after removing cells that do not go into the differential."
+                    f"Too few good candidates found. min_num_good_cells {min_num_good_cells} is not reached by {num_cells} candidates. Decrease min_num_good_cells or check code and slide for error. If this error occurs it means that the minimum cell detection threshold is reached, but failed after removing cells that do not go into the differential."
                 )
-        
+
         except Exception as e:
             self.error = True
             if self.continue_on_error:
