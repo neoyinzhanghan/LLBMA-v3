@@ -1147,11 +1147,16 @@ class BMACounter:
                 os.path.join(self.save_dir, "runtime_data.csv"), header=False
             )
 
-            num_cells = get_number_of_regions_and_cells(self.save_dir)
+            (
+                num_focus_regions_passed,
+                num_unannotated_focus_regions,
+                num_cells_passed,
+                num_removed_cells,
+            ) = get_number_of_regions_and_cells(self.save_dir)
 
-            if num_cells < min_num_good_cells:
+            if num_cells_passed < min_num_good_cells:
                 raise TooFewCandidatesError(
-                    f"Too few good candidates found. min_num_good_cells {min_num_good_cells} is not reached by {num_cells} candidates. Decrease min_num_good_cells or check code and slide for error. If this error occurs it means that the minimum cell detection threshold is reached, but failed after removing cells that do not go into the differential."
+                    f"Too few good candidates found. min_num_good_cells {min_num_good_cells} is not reached by {num_cells_passed} candidates. Decrease min_num_good_cells or check code and slide for error. If this error occurs it means that the minimum cell detection threshold is reached, but failed after removing cells that do not go into the differential."
                 )
 
         except Exception as e:
