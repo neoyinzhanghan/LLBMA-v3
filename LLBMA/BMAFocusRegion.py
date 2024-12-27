@@ -149,13 +149,13 @@ class FocusRegion:
 
         else:
             self.YOLO_df.to_csv(
-                os.path.join(save_dir, "focus_regions", "YOLO_df", f"{self.idx}.csv")
+                os.path.join(save_dir, "focus_regions", "YOLO_df", f"{self.idx}.csv"),
+                index=False,
             )
 
     def get_classification(self):
         """Return the classification of the focus region.
         which one of the following:
-        - adequate
         - inadequate
 
         has the highest confidence score.
