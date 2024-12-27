@@ -862,12 +862,12 @@ class BMACounter:
                 f"Too few focus regions found. min_num_focus_regions {min_num_focus_regions} is not reached by {len(self.focus_regions)} focus regions. Decrease min_num_focus_regions or check code and slide for error."
             )
 
-        # Check if the sum is below the minimum required number
-        if total_detected < min_num_cells:
-            raise TooFewCandidatesError(
-                f"Too few candidates found. min_num_cells {min_num_cells} is not reached by {total_detected} candidates. Decrease min_num_cells or check code and slide for error."
-                "Decrease min_num_cells or check code and slide for error."
-            )
+        # # Check if the sum is below the minimum required number
+        # if total_detected < min_num_cells:
+        #     raise TooFewCandidatesError(
+        #         f"Too few candidates found. min_num_cells {min_num_cells} is not reached by {total_detected} candidates. Decrease min_num_cells or check code and slide for error."
+        #         "Decrease min_num_cells or check code and slide for error."
+        #     ) # TODO REMOVE this check is deprecated
 
     def label_wbc_candidates(self):
         """Update the labels of the wbc_candidates of the PBCounter object."""
