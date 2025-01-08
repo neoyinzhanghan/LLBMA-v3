@@ -81,10 +81,10 @@ allowed_reading_time = 60  # in seconds
 
 region_cropping_batch_size = 512
 region_saving_batch_size = 512
-region_clf_batch_size = 32
-high_mag_region_clf_batch_size = 10
-cell_clf_batch_size = 256
-YOLO_batch_size = 32
+region_clf_batch_size = 16
+high_mag_region_clf_batch_size = 8
+cell_clf_batch_size = 128
+YOLO_batch_size = 16
 
 #############################
 ### Models Configurations ###
